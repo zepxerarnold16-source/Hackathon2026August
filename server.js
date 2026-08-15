@@ -2073,6 +2073,15 @@ async function callGemini({
 
             }
 
+            function extractGeminiText(data) {
+                try {
+                    // Gemini response structure
+                    return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+                } catch (error) {
+                    return null;
+                }
+            }
+
             const answer =
                 extractGeminiText(
                     data
