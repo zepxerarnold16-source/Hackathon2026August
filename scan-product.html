@@ -1624,8 +1624,18 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================================================
-       CIVICAI — FAST PRODUCT AI SCANNER
+       CIVICAI FAST PRODUCT SCANNER
        Optimized Frontend
+       
+       BACKEND ENDPOINTS:
+       - GET  /api/health → Server status check
+       - POST /api/analyze-product → AI image analysis (Gemini)
+       - POST /api/product-question → Q&A about product (Groq)
+       
+       CONFIGURATION:
+       - API_BASE uses window.location.origin for relative URLs
+       - Images compressed to 1280x1280, JPEG quality 0.78
+       - Base64 data URLs sent to backend
        ========================================================= */
 
     /* =========================================================
@@ -1715,8 +1725,21 @@ document.addEventListener("DOMContentLoaded", () => {
        API
        ========================================================= */
 
+    /*
+     * CIVICAI API BASE URL
+     *
+     * Automatically detects the correct API endpoint.
+     * Uses current origin by default (same server).
+     */
+
     const API_BASE =
-        window.CIVICAI_API_URL || "";
+        window.CIVICAI_API_URL ||
+        window.location.origin;
+
+    console.log(
+        "API_BASE:",
+        API_BASE
+    );
 
 
     /* =========================================================
@@ -1808,7 +1831,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             if (!response.ok) {
-
+                
                 throw new Error(
                     data.error ||
                     `Health check failed: ${response.status}`

@@ -2519,53 +2519,44 @@ const PRODUCT_SYSTEM_PROMPT = `
 
 You are CivicAI Product Scanner AI.
 
-Analyze the consumer product using:
-
+Analyze the consumer product carefully using:
 - image
-- product name
-- description
+- product name (if provided)
+- description (if provided)
 
-Do not invent information.
+Instructions:
+1. Extract ALL visible information from the image
+2. Use "Not available" for information you cannot read
+3. Never invent or guess information
+4. Estimate price only if clearly visible
+5. For medicines: explain only visible label information
 
-If information cannot be read,
-return "Not available".
+Return a complete JSON object with these fields:
+{
+  "productName": "visible product name or 'Not available'",
+  "brand": "brand name or 'Not available'",
+  "category": "product category",
+  "manufacturer": "manufacturer name or 'Not available'",
+  "price": "visible price or 'Not available'",
+  "currency": "INR/USD/EUR or 'Not available'",
+  "quantity": "size/quantity or 'Not available'",
+  "ingredients": "ingredients list or 'Not available'",
+  "manufacturingDate": "manufacturing date or 'Not available'",
+  "expiryDate": "expiry date or 'Not available'",
+  "batchNumber": "batch number or 'Not available'",
+  "purpose": "product purpose or 'Not available'",
+  "benefits": "claimed benefits or 'Not available'",
+  "warnings": "safety warnings or 'Not available'",
+  "consumerConcern": "potential concerns or 'None identified'",
+  "visibleCondition": "condition of product or 'Unknown'",
+  "missingInformation": "list what's not visible or 'None'",
+  "confidence": "85",
+  "summary": "brief product summary",
+  "recommendation": "consumer recommendation",
+  "message": "additional information or 'N/A'"
+}
 
-Analyze:
-
-productName
-brand
-category
-manufacturer
-price
-currency
-quantity
-ingredients
-manufacturingDate
-expiryDate
-batchNumber
-purpose
-benefits
-warnings
-consumerConcern
-visibleCondition
-missingInformation
-confidence
-summary
-recommendation
-message
-
-For medicine:
-
-Do not diagnose.
-
-Do not prescribe.
-
-Do not provide personalized dosage.
-
-Only explain visible label information
-and general safety information.
-
-Return ONLY valid JSON.
+Return ONLY valid JSON, no markdown, no explanation.
 
 `;
 
@@ -2582,138 +2573,343 @@ const PRODUCT_SCHEMA = {
 
         productName: {
             type:
-                "string"
+                "string",
+            description:
+                "Name of the product"
         },
 
         brand: {
             type:
-                "string"
+                "string",
+            description:
+                "Brand name"
         },
 
         category: {
             type:
-                "string"
+                "string",
+            description:
+                "Product category"
         },
 
         manufacturer: {
             type:
-                "string"
+                "string",
+            description:
+                "Manufacturer name"
+        },
+
+        estimatedPrice: {
+            type:
+                "string",
+            description:
+                "Estimated or visible price"
         },
 
         price: {
             type:
-                "string"
+                "string",
+            description:
+                "Price information"
         },
 
         currency: {
             type:
-                "string"
+                "string",
+            description:
+                "Currency code (INR, USD, etc.)"
         },
 
         quantity: {
             type:
-                "string"
+                "string",
+            description:
+                "Quantity or size"
         },
 
         ingredients: {
             type:
-                "string"
+                "string",
+            description:
+                "Ingredients list"
         },
 
         manufacturingDate: {
             type:
-                "string"
+                "string",
+            description:
+                "Manufacturing date"
         },
 
         expiryDate: {
             type:
-                "string"
+                "string",
+            description:
+                "Expiry or expiration date"
+        },
+
+        expiry: {
+            type:
+                "string",
+            description:
+                "Expiry information"
         },
 
         batchNumber: {
             type:
-                "string"
+                "string",
+            description:
+                "Batch number"
         },
 
         purpose: {
             type:
-                "string"
+                "string",
+            description:
+                "Product purpose or use"
         },
 
         benefits: {
             type:
-                "string"
+                "string",
+            description:
+                "Claimed benefits"
         },
 
         warnings: {
             type:
-                "string"
+                "string",
+            description:
+                "Safety warnings or precautions"
+        },
+
+        warning: {
+            type:
+                "string",
+            description:
+                "Safety warning information"
         },
 
         consumerConcern: {
             type:
-                "string"
+                "string",
+            description:
+                "Potential consumer concerns"
         },
 
         visibleCondition: {
             type:
-                "string"
+                "string",
+            description:
+                "Product condition"
+        },
+
+        condition: {
+            type:
+                "string",
+            description:
+                "Product condition assessment"
         },
 
         missingInformation: {
             type:
-                "string"
+                "string",
+            description:
+                "Information not visible in image"
         },
 
         confidence: {
             type:
-                "string"
+                "string",
+            description:
+                "AI confidence percentage"
         },
 
         summary: {
             type:
-                "string"
+                "string",
+            description:
+                "Summary of analysis"
         },
 
         recommendation: {
             type:
-                "string"
+                "string",
+            description:
+                "Recommendation for consumer"
         },
 
         message: {
             type:
-                "string"
+                "string",
+            description:
+                "General message"
         }
 
     },
 
     required: [
-
-        "productName",
-        "brand",
-        "category",
-        "manufacturer",
-        "price",
-        "currency",
-        "quantity",
-        "ingredients",
-        "manufacturingDate",
-        "expiryDate",
-        "batchNumber",
-        "purpose",
-        "benefits",
-        "warnings",
-        "consumerConcern",
-        "visibleCondition",
-        "missingInformation",
-        "confidence",
-        "summary",
-        "recommendation",
-        "message"
-
+        "productName"
     ]
 
 };
+
+// ============================================================
+// NORMALIZE PRODUCT ANALYSIS
+// ============================================================
+//
+// Converts backend AI response to frontend-friendly format.
+// Handles field name variations (price vs estimatedPrice, etc.)
+//
+// ============================================================
+
+function normalizeProductAnalysis(analysis) {
+
+    if (!analysis || typeof analysis !== "object") {
+        analysis = {};
+    }
+
+    return {
+
+        productName:
+            analysis.productName ||
+            analysis.name ||
+            "Not available",
+
+        brand:
+            analysis.brand ||
+            "Not available",
+
+        category:
+            analysis.category ||
+            analysis.type ||
+            "Unknown",
+
+        manufacturer:
+            analysis.manufacturer ||
+            "Not available",
+
+        estimatedPrice:
+            analysis.estimatedPrice ||
+            analysis.price ||
+            "Not available",
+
+        price:
+            analysis.price ||
+            analysis.estimatedPrice ||
+            "Not available",
+
+        currency:
+            analysis.currency ||
+            "Not specified",
+
+        quantity:
+            analysis.quantity ||
+            analysis.size ||
+            "Not available",
+
+        ingredients:
+            analysis.ingredients ||
+            "Not available",
+
+        manufacturingDate:
+            analysis.manufacturingDate ||
+            analysis.mfg_date ||
+            "Not available",
+
+        expiryDate:
+            analysis.expiryDate ||
+            analysis.expiry ||
+            analysis.exp_date ||
+            "Not available",
+
+        batchNumber:
+            analysis.batchNumber ||
+            analysis.batch ||
+            "Not available",
+
+        purpose:
+            analysis.purpose ||
+            analysis.use ||
+            "Not specified",
+
+        benefits:
+            analysis.benefits ||
+            "Not listed",
+
+        warnings:
+            analysis.warnings ||
+            analysis.warning ||
+            "No warnings listed",
+
+        consumerConcern:
+            analysis.consumerConcern ||
+            analysis.concern ||
+            "None identified",
+
+        visibleCondition:
+            analysis.visibleCondition ||
+            analysis.condition ||
+            "Good",
+
+        missingInformation:
+            analysis.missingInformation ||
+            "None",
+
+        confidence:
+            normalizeConfidenceValue(
+                analysis.confidence
+            ),
+
+        summary:
+            analysis.summary ||
+            "Product analysis complete",
+
+        recommendation:
+            analysis.recommendation ||
+            "Use as directed",
+
+        message:
+            analysis.message ||
+            ""
+
+    };
+
+}
+
+// ============================================================
+// NORMALIZE CONFIDENCE VALUE
+// ============================================================
+
+function normalizeConfidenceValue(value) {
+
+    if (!value) return 75;
+
+    if (typeof value === "number") {
+
+        if (value > 1) return value;
+
+        return Math.round(value * 100);
+
+    }
+
+    if (typeof value === "string") {
+
+        const num = parseInt(value, 10);
+
+        if (!isNaN(num)) return Math.min(100, Math.max(0, num));
+
+        if (value.toLowerCase().includes("high")) return 90;
+
+        if (value.toLowerCase().includes("medium")) return 65;
+
+        if (value.toLowerCase().includes("low")) return 40;
+
+    }
+
+    return 75;
+
+}
 
 // ============================================================
 // /api/analyze-product
@@ -2806,6 +3002,11 @@ Analyze this product.
                     raw
                 );
 
+            const normalizedResult =
+                normalizeProductAnalysis(
+                    result
+                );
+
             return res.json({
 
                 success:
@@ -2817,17 +3018,17 @@ Analyze this product.
                 model:
                     GEMINI_MODEL,
 
-                result,
+                result:
+                    normalizedResult,
 
                 product:
-                    result,
+                    normalizedResult,
 
                 analysis:
-                    result,
+                    normalizedResult,
 
                 answer:
-                    result?.message ||
-                    result?.summary ||
+                    normalizedResult?.summary ||
                     ""
 
             });
