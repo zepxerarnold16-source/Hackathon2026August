@@ -856,7 +856,7 @@ console.log(
 );
 
 console.log(
-    "CHRONICAI REGISTER MODULE READY"
+    "ChronicAI REGISTER MODULE READY"
 );
 
 console.log(

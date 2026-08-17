@@ -3801,7 +3801,7 @@ async function initializeApp() {
     );
 
     console.log(
-        "CHRONICAI MAIN APPLICATION STARTING"
+        "ChronicAI MAIN APPLICATION STARTING"
     );
 
     console.log(
@@ -3886,7 +3886,7 @@ async function initializeApp() {
     );
 
     console.log(
-        "CHRONICAI MAIN APPLICATION READY"
+        "ChronicAI MAIN APPLICATION READY"
     );
 
     console.log(

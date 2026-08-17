@@ -6420,7 +6420,7 @@ app.listen(
         );
 
         console.log(
-            "                 CHRONICAI BACKEND"
+            "                 ChronicAI BACKEND"
         );
 
         console.log(

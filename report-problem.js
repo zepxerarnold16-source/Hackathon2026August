@@ -1643,7 +1643,7 @@ async function submitReport() {
     } catch (error) {
 
         console.error(
-            "CHRONICAI REPORT SUBMISSION ERROR:",
+            "ChronicAI REPORT SUBMISSION ERROR:",
             error
         );
 
@@ -1907,7 +1907,7 @@ console.log(
 );
 
 console.log(
-    "CHRONICAI REPORT PROBLEM MODULE"
+    "ChronicAI REPORT PROBLEM MODULE"
 );
 
 console.log(
