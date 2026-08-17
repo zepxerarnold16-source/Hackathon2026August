@@ -11,11 +11,11 @@
     content="width=device-width, initial-scale=1.0"
 >
 
-<title>CivicAI — Report a Problem</title>
+<title>ChronicAI — Report a Problem</title>
 
 <meta
     name="description"
-    content="CivicAI intelligent civic problem reporting and AI analysis."
+    content="ChronicAI intelligent civic problem reporting and AI analysis."
 >
 <link
         rel="icon"
@@ -25,7 +25,7 @@
 <style>
 
     /* =====================================================
-       CIVICAI — REPORT PROBLEM
+       CHRONICAI — REPORT PROBLEM
     ===================================================== */
 
     :root {
@@ -2113,7 +2113,7 @@
         </div>
 
         <div class="loader-text">
-            Loading CivicAI...
+            Loading ChronicAI...
         </div>
 
     </div>
@@ -2178,7 +2178,7 @@
 
         <p>
             Describe the problem or upload a photo.
-            CivicAI will analyze what happened, estimate
+            ChronicAI will analyze what happened, estimate
             urgency, identify the appropriate authority,
             and prepare your complaint.
         </p>
@@ -2257,7 +2257,7 @@
         <div class="card-header">
 
             <h2>
-                Tell CivicAI what happened
+                Tell ChronicAI what happened
             </h2>
 
             <p>
@@ -2432,7 +2432,7 @@
                     class="btn btn-primary"
                     id="analyzeButton"
                 >
-                    🤖 Analyze with CivicAI
+                    🤖 Analyze with ChronicAI
                 </button>
 
                 <button
@@ -2464,7 +2464,7 @@
         </div>
 
         <h3>
-            CivicAI is analyzing your report
+            ChronicAI is analyzing your report
         </h3>
 
         <p>
@@ -2493,11 +2493,11 @@
         <div class="card-header">
 
             <h2>
-                🤖 CivicAI Analysis
+                🤖 ChronicAI Analysis
             </h2>
 
             <p>
-                This is what CivicAI understood from
+                This is what ChronicAI understood from
                 your report.
             </p>
 
@@ -2638,7 +2638,7 @@
             <div class="recommendation">
 
                 <strong>
-                    💡 CivicAI Recommendation
+                    💡 ChronicAI Recommendation
                 </strong>
 
                 <p
@@ -2741,7 +2741,7 @@
 
                 <p class="review-note">
                     Please carefully review the complaint
-                    before submitting. CivicAI may assist
+                    before submitting. ChronicAI may assist
                     with drafting, but you remain responsible
                     for confirming that the information is
                     accurate.
@@ -2944,7 +2944,7 @@
         </h2>
 
         <p>
-            Your civic report has been recorded by CivicAI.
+            Your civic report has been recorded by ChronicAI.
             Keep the report ID for future tracking.
         </p>
 
@@ -2983,7 +2983,7 @@
 
 <footer>
 
-    CivicAI • AI-assisted civic reporting
+    ChronicAI • AI-assisted civic reporting
 
 </footer>
 
@@ -3975,7 +3975,7 @@
 
                 throw new Error(
                     data?.error ||
-                    "CivicAI returned an invalid analysis."
+                    "ChronicAI returned an invalid analysis."
                 );
 
             }
@@ -4003,7 +4003,7 @@
 
                 showAlert(
                     currentAnalysis.message ||
-                    "CivicAI could not identify a genuine civic issue from the provided information.",
+                    "ChronicAI could not identify a genuine civic issue from the provided information.",
                     "success"
                 );
 
@@ -4081,7 +4081,7 @@
         catch (error) {
 
             console.error(
-                "CivicAI analysis error:",
+                "ChronicAI analysis error:",
                 error
             );
 
@@ -4098,7 +4098,7 @@
 
             showAlert(
                 error?.message ||
-                "Unable to connect to CivicAI."
+                "Unable to connect to ChronicAI."
             );
 
         }
@@ -4241,7 +4241,7 @@
         problemSummary.textContent =
             analysis.summary ||
             analysis.message ||
-            "CivicAI identified a potential civic issue.";
+            "ChronicAI identified a potential civic issue.";
 
 
         categoryValue.textContent =
@@ -4568,7 +4568,7 @@ Description:
 
 ${user.description || analysis.summary || "The attached information and photograph provide details regarding the reported civic problem."}
 
-CivicAI Analysis:
+ChronicAI Analysis:
 
 ${analysis.summary || analysis.message || "The available information indicates that this matter should be reviewed by the concerned civic authority."}
 
@@ -4590,7 +4590,7 @@ Location:
 ${location}
 
 Submitted through:
-CivicAI — AI-assisted Civic Reporting System`;
+ChronicAI — AI-assisted Civic Reporting System`;
 
     }
 

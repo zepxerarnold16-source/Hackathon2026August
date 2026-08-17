@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CivicAI — Submit Complaint</title>
+    <title>ChronicAI — Submit Complaint</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +27,7 @@
     <style>
 
         /* =====================================================
-           CIVICAI — COMPLAINT PAGE
+           CHRONICAI — COMPLAINT PAGE
         ===================================================== */
 
         :root {
@@ -1433,7 +1433,7 @@
         </div>
 
         <span class="brand-text">
-            CivicAI
+            ChronicAI
         </span>
 
     </a>
@@ -1497,7 +1497,7 @@
 
         <p>
             Describe the problem, upload a photo if available,
-            and let CivicAI analyze the issue and identify
+            and let ChronicAI analyze the issue and identify
             the appropriate civic department.
         </p>
 
@@ -1527,7 +1527,7 @@
 
                 <p>
                     Provide as much information as possible
-                    so CivicAI can understand the issue.
+                    so ChronicAI can understand the issue.
                 </p>
 
             </div>
@@ -1743,7 +1743,7 @@
 
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
 
-                    Analyze with CivicAI
+                    Analyze with ChronicAI
 
                 </button>
 
@@ -1763,7 +1763,7 @@
 
                 <h2>
                     <i class="fa-solid fa-brain"></i>
-                    CivicAI Analysis
+                    ChronicAI Analysis
                 </h2>
 
                 <p>
@@ -1795,7 +1795,7 @@
 
 
                 <p>
-                    Submit your problem details and CivicAI
+                    Submit your problem details and ChronicAI
                     will analyze the issue, severity,
                     category and responsible department.
                 </p>
@@ -1816,7 +1816,7 @@
 
 
                 <h3>
-                    CivicAI is analyzing...
+                    ChronicAI is analyzing...
                 </h3>
 
 
@@ -2107,7 +2107,7 @@
 
 <footer>
 
-    CivicAI — Smart Civic Reporting Platform
+    ChronicAI — Smart Civic Reporting Platform
 
 </footer>
 
@@ -2123,7 +2123,7 @@
 ===================================================== */
 
 const API_BASE =
-    window.CIVICAI_API_URL ||
+    window.CHRONICAI_API_URL ||
     "";
 
 
@@ -2751,7 +2751,7 @@ analyzeProblem?.addEventListener(
         } catch (error) {
 
             console.error(
-                "CivicAI analysis error:",
+                "ChronicAI analysis error:",
                 error
             );
 
@@ -3298,7 +3298,7 @@ async function submitCivicReport() {
         const existing =
             JSON.parse(
                 localStorage.getItem(
-                    "civicai-reports"
+                    "ChronicAI-reports"
                 ) || "[]"
             );
 
@@ -3322,7 +3322,7 @@ async function submitCivicReport() {
 
 
         localStorage.setItem(
-            "civicai-reports",
+            "ChronicAI-reports",
             JSON.stringify(existing)
         );
 
@@ -3394,7 +3394,7 @@ generatedReport.hidden =
 
 
 console.log(
-    "CivicAI Complaint System initialized 🚀"
+    "ChronicAI Complaint System initialized 🚀"
 );
 
 </script>

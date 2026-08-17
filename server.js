@@ -1,8 +1,8 @@
 // ============================================================
-// CIVICAI — FINAL COMPLETE SERVER.JS
+// CHRONICAI — FINAL COMPLETE SERVER.JS
 // ============================================================
 //
-// CIVICAI BACKEND
+// CHRONICAI BACKEND
 //
 // AI ARCHITECTURE
 // ------------------------------------------------------------
@@ -1043,10 +1043,10 @@ async function callGroq({
 
 const NORMAL_CHAT_PROMPT = `
 
-You are CivicAI AI Life Helper.
+You are ChronicAI AI Life Helper.
 
 You are the main conversational AI assistant
-inside the CivicAI website.
+inside the ChronicAI website.
 
 You are powered by Groq.
 
@@ -1143,7 +1143,7 @@ You can explain:
 - What information the citizen should collect.
 - What practical next step may help.
 
-But do not say that CivicAI submitted a complaint
+But do not say that ChronicAI submitted a complaint
 unless the report endpoint was actually called
 and successfully returned a submission result.
 
@@ -1235,7 +1235,7 @@ FINAL RULE
 Answer the user's question naturally and helpfully.
 `;
 // ============================================================
-// CIVICAI — VOICE TRANSCRIPTION
+// CHRONICAI — VOICE TRANSCRIPTION
 // ============================================================
 // Browser audio
 //       ↓
@@ -1261,7 +1261,7 @@ const voiceUpload = multer({
 // /api/transcribe
 // ============================================================
 // ============================================================
-// CIVICAI — VOICE TRANSCRIPTION
+// ChronicAI — VOICE TRANSCRIPTION
 // GROQ WHISPER
 // ============================================================
 
@@ -1412,7 +1412,7 @@ app.post(
                     [
                         req.file.buffer
                     ],
-                    `civicai-audio.${extension}`,
+                    `ChronicAI-audio.${extension}`,
                     {
                         type: mimeType
                     }
@@ -1510,7 +1510,7 @@ app.post(
             );
 
             console.error(
-                "CIVICAI / GROQ TRANSCRIPTION ERROR"
+                "ChronicAI / GROQ TRANSCRIPTION ERROR"
             );
 
             console.error(
@@ -1618,7 +1618,7 @@ app.post(
 // /api/chat
 // ============================================================
 //// ============================================================
-// CIVICAI — AI LIFE HELPER
+// ChronicAI — AI LIFE HELPER
 // GROQ ONLY
 // FRONTEND: POST /api/chat
 // ============================================================
@@ -1786,7 +1786,7 @@ app.post("/api/chat", async (req, res) => {
             "================================================"
         );
         console.error(
-            "CIVICAI AI LIFE HELPER — GROQ ERROR"
+            "ChronicAI AI LIFE HELPER — GROQ ERROR"
         );
         console.error(
             error?.message || error
@@ -2198,7 +2198,7 @@ function parseAIJSON(text) {
 
 const CIVIC_SYSTEM_PROMPT = `
 
-You are CivicAI Civic Report Analysis AI.
+You are ChronicAI Civic Report Analysis AI.
 
 Analyze the citizen's civic problem.
 
@@ -2517,7 +2517,7 @@ Analyze this civic report.
 
 const PRODUCT_SYSTEM_PROMPT = `
 
-You are CivicAI Product Scanner AI.
+You are ChronicAI Product Scanner AI.
 
 Analyze the consumer product carefully using:
 - image
@@ -3074,7 +3074,7 @@ Analyze this product.
 
 const PRODUCT_CHAT_PROMPT = `
 
-You are CivicAI Product Live Helper.
+You are ChronicAI Product Live Helper.
 
 You are a conversational product assistant.
 
@@ -3322,7 +3322,7 @@ Answer naturally.
 
 const AUTHORITY_PROMPT = `
 
-You are CivicAI Authority Assistant.
+You are ChronicAI Authority Assistant.
 
 Help identify the appropriate authority
 for a civic problem.
@@ -3484,7 +3484,7 @@ Suggest the responsible authority.
     }
 );
 // ============================================================
-// CIVICAI — SECURE OTP SYSTEM
+// CHRONICAI — SECURE OTP SYSTEM
 // ============================================================
 //
 // EMAIL OTP  -> Nodemailer / Gmail
@@ -4192,10 +4192,10 @@ async function sendEmailOtp(
             email,
 
         subject:
-            "CivicAI Verification OTP",
+            "ChronicAI Verification OTP",
 
         text:
-            `Your CivicAI verification OTP is ${otp}. This OTP expires in 5 minutes.`,
+            `Your ChronicAI verification OTP is ${otp}. This OTP expires in 5 minutes.`,
 
         html:
             `
@@ -4224,7 +4224,7 @@ async function sendEmailOtp(
                 >
 
                     <h2>
-                        CivicAI Verification
+                        ChronicAI Verification
                     </h2>
 
                     <p>
@@ -4293,7 +4293,7 @@ async function sendPhoneOtp(
     await twilioClient.messages.create({
 
         body:
-            `CivicAI verification OTP: ${otp}. Valid for 5 minutes.`,
+            `ChronicAI verification OTP: ${otp}. Valid for 5 minutes.`,
 
         from:
             TWILIO_PHONE_NUMBER,
@@ -5695,7 +5695,7 @@ app.post(
 
             const text = `
 
-CIVICAI CIVIC COMPLAINT
+CHRONICAI CIVIC COMPLAINT
 
 ========================================
 
@@ -5768,7 +5768,7 @@ ${analysis.recommendation || "Not available"}
 
 ========================================
 
-This complaint was generated through CivicAI.
+This complaint was generated through ChronicAI.
 
 `;
 
@@ -5782,8 +5782,8 @@ This complaint was generated through CivicAI.
 
                     subject:
                         reportId
-                            ? `CivicAI Complaint - ${reportId}`
-                            : "CivicAI Civic Complaint",
+                            ? `ChronicAI Complaint - ${reportId}`
+                            : "ChronicAI Civic Complaint",
 
                     text
 
@@ -5867,10 +5867,10 @@ app.post(
                     to,
 
                     subject:
-                        "CivicAI Gmail Test",
+                        "ChronicAI Gmail Test",
 
                     text:
-                        "CivicAI Gmail integration is working successfully."
+                        "ChronicAI Gmail integration is working successfully."
 
                 });
 
@@ -6063,7 +6063,7 @@ app.get(
                 "online",
 
             service:
-                "CivicAI Backend",
+                "ChronicAI Backend",
 
             ai: {
 
@@ -6142,7 +6142,7 @@ app.get(
                 true,
 
             message:
-                "CivicAI backend API is running.",
+                "ChronicAI backend API is running.",
 
             endpoints: {
 
@@ -6420,7 +6420,7 @@ app.listen(
         );
 
         console.log(
-            "                 CIVICAI BACKEND"
+            "                 CHRONICAI BACKEND"
         );
 
         console.log(

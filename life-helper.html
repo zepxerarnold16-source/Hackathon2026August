@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>CivicAI — AI Life Helper</title>
+<title>ChronicAI — AI Life Helper</title>
 
 <link
     rel="stylesheet"
@@ -1494,7 +1494,7 @@ button{
                 <div>
 
                     <div class="header-title">
-                        CivicAI Life Helper
+                        ChronicAI Life Helper
                     </div>
 
                     <div class="status">
@@ -1557,7 +1557,7 @@ button{
                     </h1>
 
                     <p>
-                        CivicAI is your AI life helper.
+                        ChronicAI is your AI life helper.
                         Ask questions, speak naturally,
                         upload an image, or use Voice Assistant
                         for a hands-free conversation.
@@ -1624,7 +1624,7 @@ button{
 
 
             <div class="assistant-label">
-                <b>CivicAI Assistant</b>
+                <b>ChronicAI Assistant</b>
             </div>
 
 
@@ -1727,7 +1727,7 @@ button{
                         class="chat-input"
                         id="chatInput"
                         rows="1"
-                        placeholder="Message CivicAI..."
+                        placeholder="Message ChronicAI..."
                     ></textarea>
 
 
@@ -1744,7 +1744,7 @@ button{
 
 
                 <div class="input-footer">
-                    CivicAI can make mistakes.
+                    ChronicAI can make mistakes.
                     Verify important information when necessary.
                 </div>
 
@@ -1776,7 +1776,7 @@ button{
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================================================
-       CIVICAI LIFE HELPER
+       ChronicAI LIFE HELPER
        FIXED VOICE SYSTEM
 
        FIXES:
@@ -1855,9 +1855,9 @@ document.addEventListener("DOMContentLoaded", () => {
        STORAGE
     ========================================================= */
 
-    const STORAGE_MESSAGES = "civicai_messages";
-    const STORAGE_RECENT = "civicai_recent";
-    const STORAGE_THEME = "civicai_theme";
+    const STORAGE_MESSAGES = "ChronicAI_messages";
+    const STORAGE_RECENT = "ChronicAI_recent";
+    const STORAGE_THEME = "ChronicAI_theme";
 
 
     /* =========================================================
@@ -2501,7 +2501,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 location: "",
 
                                 reporterName:
-                                    "CivicAI User",
+                                    "ChronicAI User",
 
                                 image
 
@@ -2731,7 +2731,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             renderMessage(
                 "ai",
-                "**CivicAI couldn't process your request.**\n\n" +
+                "**ChronicAI couldn't process your request.**\n\n" +
                 errorMessage
             );
 
@@ -4262,7 +4262,7 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append(
                 "audio",
                 blob,
-                `civicai-voice.${extension}`
+                `ChronicAI-voice.${extension}`
             );
 
 
@@ -4991,7 +4991,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 (
                                     message.role === "user"
                                         ? "You"
-                                        : "CivicAI"
+                                        : "ChronicAI"
                                 ) +
                                 ": " +
                                 message.content
@@ -5266,7 +5266,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     console.log(
-        "CivicAI Life Helper initialized."
+        "ChronicAI Life Helper initialized."
     );
 
     console.log(
@@ -5291,7 +5291,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =============================================================
-   CIVICAI ASSISTANT — DRAG ANYWHERE
+   CHRONICAI ASSISTANT — DRAG ANYWHERE
    ============================================================= */
 
 (function setupAssistantDrag() {
@@ -5306,7 +5306,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     const STORAGE_KEY =
-        "civicai_assistant_position_v4";
+        "ChronicAI_assistant_position_v4";
 
 
     let dragging =

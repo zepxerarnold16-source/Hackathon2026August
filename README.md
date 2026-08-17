@@ -1,2 +1,2 @@
-# civi-ai
+# Chronic-ai
 civic helper

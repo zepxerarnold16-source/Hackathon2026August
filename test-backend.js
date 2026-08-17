@@ -4,7 +4,7 @@
 
 import http from 'http';
 
-console.log("🧪 TESTING CIVICAI BACKEND FIXES\n");
+console.log("🧪 TESTING CHRONICAI BACKEND FIXES\n");
 
 // Test 1: Health endpoint
 function testHealth() {

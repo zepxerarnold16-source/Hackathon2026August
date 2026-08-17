@@ -1,5 +1,5 @@
 // ============================================================
-// CIVICAI — REPORT PROBLEM
+// CHRONICAI — REPORT PROBLEM
 // CONVERSATIONAL AI + IMAGE + LOCATION + REPORT GENERATION
 // + CITIZEN VERIFICATION + SUBMIT
 // ============================================================
@@ -170,7 +170,7 @@ function setAnalyzeLoading(
 
         analyzeButton.innerHTML = `
             <i class="fa-solid fa-spinner fa-spin"></i>
-            CivicAI is thinking...
+            ChronicAI is thinking...
         `;
 
     } else {
@@ -232,7 +232,7 @@ function getStoredUser() {
 
         const stored =
             localStorage.getItem(
-                "civicAIUser"
+                "ChronicAIUser"
             );
 
         if (!stored) {
@@ -246,7 +246,7 @@ function getStoredUser() {
     } catch (error) {
 
         console.warn(
-            "Unable to read stored CivicAI user:",
+            "Unable to read stored ChronicAI user:",
             error
         );
 
@@ -269,14 +269,14 @@ onAuthStateChanged(
         if (!user) {
 
             console.warn(
-                "CivicAI: No Firebase user currently logged in."
+                "ChronicAI: No Firebase user currently logged in."
             );
 
             return;
         }
 
         console.log(
-            "CivicAI: Logged in citizen:",
+            "ChronicAI: Logged in citizen:",
             user.email
         );
 
@@ -316,19 +316,19 @@ async function loadCitizenProfile(
                 snapshot.val();
 
             console.log(
-                "CivicAI citizen profile loaded:",
+                "ChronicAI citizen profile loaded:",
                 profile
             );
 
             if (
                 profile.name &&
                 !localStorage.getItem(
-                    "civicAIUserName"
+                    "ChronicAIUserName"
                 )
             ) {
 
                 localStorage.setItem(
-                    "civicAIUserName",
+                    "ChronicAIUserName",
                     profile.name
                 );
             }
@@ -369,7 +369,7 @@ function getCitizenName() {
 
     return (
         localStorage.getItem(
-            "civicAIUserName"
+            "ChronicAIUserName"
         ) ||
         "Anonymous"
     );
@@ -401,7 +401,7 @@ function getCitizenEmail() {
 
     return (
         localStorage.getItem(
-            "civicAIUserEmail"
+            "ChronicAIUserEmail"
         ) ||
         ""
     );
@@ -580,7 +580,7 @@ if (imageInput) {
 
 
                 showMessage(
-                    "Image selected successfully. CivicAI can now understand it.",
+                    "Image selected successfully. ChronicAI can now understand it.",
                     "success"
                 );
 
@@ -714,7 +714,7 @@ function displayAIReply(
     if (!aiResult) {
 
         console.log(
-            "CivicAI:",
+            "ChronicAI:",
             reply
         );
 
@@ -730,7 +730,7 @@ function displayAIReply(
 
     aiResult.innerHTML = `
 
-        <div class="ai-result-card civicai-chat-response">
+        <div class="ai-result-card ChronicAI-chat-response">
 
             <div class="ai-result-header">
 
@@ -740,7 +740,7 @@ function displayAIReply(
 
                         <i class="fa-solid fa-robot"></i>
 
-                        CivicAI
+                        ChronicAI
 
                     </span>
 
@@ -755,7 +755,7 @@ function displayAIReply(
 
             <div class="ai-result-section">
 
-                <p class="civicai-ai-message">
+                <p class="ChronicAI-ai-message">
                     ${safeReply}
                 </p>
 
@@ -829,7 +829,7 @@ function displayConversation() {
 
                         return `
 
-                            <div class="civicai-chat-message user-message">
+                            <div class="ChronicAI-chat-message user-message">
 
                                 <div class="chat-label">
                                     You
@@ -847,13 +847,13 @@ function displayConversation() {
 
                     return `
 
-                        <div class="civicai-chat-message ai-message">
+                        <div class="ChronicAI-chat-message ai-message">
 
                             <div class="chat-label">
 
                                 <i class="fa-solid fa-robot"></i>
 
-                                CivicAI
+                                ChronicAI
 
                             </div>
 
@@ -871,7 +871,7 @@ function displayConversation() {
 
     aiResult.innerHTML = `
 
-        <div class="ai-result-card civicai-conversation">
+        <div class="ai-result-card ChronicAI-conversation">
 
             ${html}
 
@@ -1000,7 +1000,7 @@ async function analyzeReport() {
 
 
     showMessage(
-        "CivicAI is understanding your problem...",
+        "ChronicAI is understanding your problem...",
         "warning"
     );
 
@@ -1100,7 +1100,7 @@ async function analyzeReport() {
             throw new Error(
                 data?.error ||
                 data?.message ||
-                `CivicAI server returned ${response.status}.`
+                `ChronicAI server returned ${response.status}.`
             );
         }
 
@@ -1118,7 +1118,7 @@ async function analyzeReport() {
         if (!reply) {
 
             throw new Error(
-                "CivicAI did not return a valid reply."
+                "ChronicAI did not return a valid reply."
             );
         }
 
@@ -1196,21 +1196,21 @@ async function analyzeReport() {
             }
 
             showMessage(
-                "CivicAI has prepared the report. Please verify it before submitting.",
+                "ChronicAI has prepared the report. Please verify it before submitting.",
                 "success"
             );
 
         } else {
 
             showMessage(
-                "CivicAI replied. You can continue the conversation.",
+                "ChronicAI replied. You can continue the conversation.",
                 "success"
             );
         }
 
 
         console.log(
-            "CivicAI response:",
+            "ChronicAI response:",
             data
         );
 
@@ -1218,14 +1218,14 @@ async function analyzeReport() {
     } catch (error) {
 
         console.error(
-            "CIVICAI CONVERSATION ERROR:",
+            "ChronicAI CONVERSATION ERROR:",
             error
         );
 
 
         showMessage(
             error?.message ||
-            "Unable to communicate with CivicAI. Please try again."
+            "Unable to communicate with ChronicAI. Please try again."
         );
 
 
@@ -1331,7 +1331,7 @@ async function submitReport() {
     ) {
 
         showMessage(
-            "Please talk with CivicAI before submitting the report."
+            "Please talk with ChronicAI before submitting the report."
         );
 
         return;
@@ -1348,7 +1348,7 @@ async function submitReport() {
     ) {
 
         showMessage(
-            "Please let CivicAI understand and prepare the report before submitting."
+            "Please let ChronicAI understand and prepare the report before submitting."
         );
 
         return;
@@ -1427,7 +1427,7 @@ async function submitReport() {
             currentUser?.uid ||
             getStoredUser()?.uid ||
             localStorage.getItem(
-                "civicAIUserId"
+                "ChronicAIUserId"
             ) ||
             "";
 
@@ -1597,7 +1597,7 @@ async function submitReport() {
         ) {
 
             localStorage.setItem(
-                "civicAILastReport",
+                "ChronicAILastReport",
                 JSON.stringify(
                     data.report
                 )
@@ -1610,7 +1610,7 @@ async function submitReport() {
         ) {
 
             localStorage.setItem(
-                "civicAILastReportId",
+                "ChronicAILastReportId",
                 reportId
             );
         }
@@ -1635,7 +1635,7 @@ async function submitReport() {
 
 
         console.log(
-            "CivicAI report submitted:",
+            "ChronicAI report submitted:",
             data
         );
 
@@ -1643,7 +1643,7 @@ async function submitReport() {
     } catch (error) {
 
         console.error(
-            "CIVICAI REPORT SUBMISSION ERROR:",
+            "CHRONICAI REPORT SUBMISSION ERROR:",
             error
         );
 
@@ -1802,7 +1802,7 @@ function resetReport() {
 
 
     console.log(
-        "CivicAI report conversation reset."
+        "ChronicAI report conversation reset."
     );
 }
 
@@ -1907,7 +1907,7 @@ console.log(
 );
 
 console.log(
-    "CIVICAI REPORT PROBLEM MODULE"
+    "CHRONICAI REPORT PROBLEM MODULE"
 );
 
 console.log(
