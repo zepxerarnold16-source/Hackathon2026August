@@ -207,7 +207,7 @@ function saveReports(reports) {
 function generateReportId() {
 
     return (
-        "CIVIC-" +
+        "CHRONIC-" +
         Date.now() +
         "-" +
         Math.floor(

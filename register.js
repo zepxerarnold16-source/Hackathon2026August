@@ -418,23 +418,23 @@ function getFirebaseErrorMessage(
 function clearOldSession() {
 
     localStorage.removeItem(
-        "ChronicAIUser"
+        "chronicAIUser"
     );
 
     localStorage.removeItem(
-        "ChronicAILoggedIn"
+        "chronicAILoggedIn"
     );
 
     localStorage.removeItem(
-        "ChronicAIUserId"
+        "chronicAIUserId"
     );
 
     localStorage.removeItem(
-        "ChronicAIUserEmail"
+        "chronicAIUserEmail"
     );
 
     localStorage.removeItem(
-        "ChronicAIUserName"
+        "chronicAIUserName"
     );
 }
 
@@ -725,12 +725,12 @@ if (registerForm) {
                 // =================================================
 
                 localStorage.setItem(
-                    "ChronicAIRegisteredEmail",
+                    "chronicAIRegisteredEmail",
                     email
                 );
 
                 localStorage.setItem(
-                    "ChronicAIRegisteredName",
+                    "chronicAIRegisteredName",
                     name
                 );
 
@@ -856,7 +856,7 @@ console.log(
 );
 
 console.log(
-    "ChronicAI REGISTER MODULE READY"
+    "CHRONICAI REGISTER MODULE READY"
 );
 
 console.log(

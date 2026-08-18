@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const savedTheme =
         localStorage.getItem(
-            "ChronicAI-theme"
+            "civicai-theme"
         );
 
 
@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
 
                 localStorage.setItem(
-                    "ChronicAI-theme",
+                    "civicai-theme",
                     isLight
                         ? "light"
                         : "dark"
@@ -1418,7 +1418,7 @@ document.addEventListener("DOMContentLoaded", () => {
        CHRONICAI API REQUEST HELPER
     ===================================================== */
 
-    async function ChronicAIRequest(
+    async function civicAIRequest(
         endpoint,
         options = {}
     ) {
@@ -1497,7 +1497,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
 
             const data =
-                await ChronicAIRequest(
+                await civicAIRequest(
                     "/api/health"
                 );
 
@@ -1563,7 +1563,7 @@ document.addEventListener("DOMContentLoaded", () => {
        window.ChronicAI.analyzeReport(...)
     ===================================================== */
 
-    async function analyzeCivicReport({
+    async function analyzeChronicReport({
 
         description = "",
 
@@ -1626,7 +1626,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const data =
-            await ChronicAIRequest(
+            await civicAIRequest(
                 "/api/analyze",
                 {
 
@@ -1678,12 +1678,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       CREATE CIVIC REPORT
+       CREATE CHRONIC REPORT
        
        Can be used by report/citizen page.
     ===================================================== */
 
-    async function createCivicReport({
+    async function createChronicReport({
 
         reporterName = "",
 
@@ -1729,7 +1729,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const data =
-            await ChronicAIRequest(
+            await civicAIRequest(
                 "/api/reports",
                 {
 
@@ -1791,10 +1791,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       LOAD ALL CIVIC REPORTS
+       LOAD ALL CHRONIC REPORTS
     ===================================================== */
 
-    async function loadCivicReports() {
+    async function loadChronicReports() {
 
         console.log(
             "ChronicAI: Loading reports..."
@@ -1802,7 +1802,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const data =
-            await ChronicAIRequest(
+            await civicAIRequest(
                 "/api/reports"
             );
 
@@ -1825,10 +1825,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       LOAD SINGLE CIVIC REPORT
+       LOAD SINGLE CHRONIC REPORT
     ===================================================== */
 
-    async function loadCivicReport(
+    async function loadChronicReport(
         reportId
     ) {
 
@@ -1848,7 +1848,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const data =
-            await ChronicAIRequest(
+            await civicAIRequest(
                 `/api/reports/${encodeURIComponent(id)}`
             );
 
@@ -1871,10 +1871,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       UPDATE CIVIC REPORT STATUS
+       UPDATE CHRONIC REPORT STATUS
     ===================================================== */
 
-    async function updateCivicReportStatus({
+    async function updateChronicReportStatus({
 
         reportId,
 
@@ -1913,7 +1913,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const data =
-            await ChronicAIRequest(
+            await civicAIRequest(
                 `/api/reports/${encodeURIComponent(id)}/status`,
                 {
 
@@ -1955,10 +1955,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       ESCALATE CIVIC REPORT
+       ESCALATE CHRONIC REPORT
     ===================================================== */
 
-    async function escalateCivicReport({
+    async function escalateChronicReport({
 
         reportId,
 
@@ -1984,7 +1984,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const data =
-            await ChronicAIRequest(
+            await civicAIRequest(
                 `/api/reports/${encodeURIComponent(id)}/escalate`,
                 {
 
@@ -2025,7 +2025,7 @@ document.addEventListener("DOMContentLoaded", () => {
        LOAD REPORT TIMELINE
     ===================================================== */
 
-    async function loadCivicReportTimeline(
+    async function loadChronicReportTimeline(
         reportId
     ) {
 
@@ -2045,7 +2045,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const data =
-            await ChronicAIRequest(
+            await civicAIRequest(
                 `/api/reports/${encodeURIComponent(id)}/timeline`
             );
 
@@ -2084,31 +2084,31 @@ document.addEventListener("DOMContentLoaded", () => {
             CHRONICAI_API_BASE,
 
         request:
-            CHRONICAIRequest,
+            civicAIRequest,
 
         checkBackend:
             checkChronicAIBackend,
 
         analyzeReport:
-            analyzeCivicReport,
+            analyzeChronicReport,
 
         createReport:
-            createCivicReport,
+            createChronicReport,
 
         getReports:
-            loadCivicReports,
+            loadChronicReports,
 
         getReport:
-            loadCivicReport,
+            loadChronicReport,
 
         updateStatus:
-            updateCivicReportStatus,
+            updateChronicReportStatus,
 
         escalateReport:
-            escalateCivicReport,
+            escalateChronicReport,
 
         getTimeline:
-            loadCivicReportTimeline
+            loadChronicReportTimeline
 
     };
 
@@ -2272,7 +2272,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     document.body.classList.add(
-        "ChronicAI-ready"
+        "civicai-ready"
     );
 
 
@@ -2299,7 +2299,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     console.log(
-        "ChronicAI FRONTEND INITIALIZED 🚀"
+        "CHRONICAI FRONTEND INITIALIZED 🚀"
     );
 
     console.log(

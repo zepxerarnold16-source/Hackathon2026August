@@ -232,7 +232,7 @@ function getStoredUser() {
 
         const stored =
             localStorage.getItem(
-                "ChronicAIUser"
+                "chronicAIUser"
             );
 
         if (!stored) {
@@ -323,12 +323,12 @@ async function loadCitizenProfile(
             if (
                 profile.name &&
                 !localStorage.getItem(
-                    "ChronicAIUserName"
+                    "chronicAIUserName"
                 )
             ) {
 
                 localStorage.setItem(
-                    "ChronicAIUserName",
+                    "chronicAIUserName",
                     profile.name
                 );
             }
@@ -369,7 +369,7 @@ function getCitizenName() {
 
     return (
         localStorage.getItem(
-            "ChronicAIUserName"
+            "chronicAIUserName"
         ) ||
         "Anonymous"
     );
@@ -401,7 +401,7 @@ function getCitizenEmail() {
 
     return (
         localStorage.getItem(
-            "ChronicAIUserEmail"
+            "chronicAIUserEmail"
         ) ||
         ""
     );
@@ -730,7 +730,7 @@ function displayAIReply(
 
     aiResult.innerHTML = `
 
-        <div class="ai-result-card ChronicAI-chat-response">
+        <div class="ai-result-card chronicai-chat-response">
 
             <div class="ai-result-header">
 
@@ -755,7 +755,7 @@ function displayAIReply(
 
             <div class="ai-result-section">
 
-                <p class="ChronicAI-ai-message">
+                <p class="chronicai-ai-message">
                     ${safeReply}
                 </p>
 
@@ -829,7 +829,7 @@ function displayConversation() {
 
                         return `
 
-                            <div class="ChronicAI-chat-message user-message">
+                            <div class="chronicai-chat-message user-message">
 
                                 <div class="chat-label">
                                     You
@@ -847,7 +847,7 @@ function displayConversation() {
 
                     return `
 
-                        <div class="ChronicAI-chat-message ai-message">
+                        <div class="chronicai-chat-message ai-message">
 
                             <div class="chat-label">
 
@@ -871,7 +871,7 @@ function displayConversation() {
 
     aiResult.innerHTML = `
 
-        <div class="ai-result-card ChronicAI-conversation">
+        <div class="ai-result-card chronicai-conversation">
 
             ${html}
 
@@ -966,7 +966,7 @@ async function analyzeReport() {
     ) {
 
         showMessage(
-            "Please describe the civic problem or upload an image."
+            "Please describe the chronic problem or upload an image."
         );
 
         descriptionInput?.focus();
@@ -1218,7 +1218,7 @@ async function analyzeReport() {
     } catch (error) {
 
         console.error(
-            "ChronicAI CONVERSATION ERROR:",
+            "CHRONICAI CONVERSATION ERROR:",
             error
         );
 
@@ -1276,7 +1276,6 @@ if (
     );
 }
 
-
 // ============================================================
 // SUBMIT REPORT
 // ============================================================
@@ -1289,33 +1288,25 @@ async function submitReport() {
 
     clearMessage();
 
-
     // ========================================================
     // CHECK AUTH
     // ========================================================
 
     if (!currentUser) {
 
-        const storedUser =
-            getStoredUser();
+        const storedUser = getStoredUser();
 
-        if (
-            !storedUser?.uid
-        ) {
+        if (!storedUser?.uid) {
 
             showMessage(
                 "Please login before submitting a civic report."
             );
 
-            setTimeout(
-                () => {
+            setTimeout(() => {
 
-                    window.location.href =
-                        "login.html";
+                window.location.href = "login.html";
 
-                },
-                1000
-            );
+            }, 1000);
 
             return;
         }
@@ -1326,9 +1317,7 @@ async function submitReport() {
     // CHECK CONVERSATION
     // ========================================================
 
-    if (
-        !conversation.length
-    ) {
+    if (!conversation.length) {
 
         showMessage(
             "Please talk with ChronicAI before submitting the report."
@@ -1339,13 +1328,10 @@ async function submitReport() {
 
 
     // ========================================================
-    // CHECK AI
+    // CHECK AI ANALYSIS
     // ========================================================
 
-    if (
-        !currentAnalysis &&
-        !reportReady
-    ) {
+    if (!currentAnalysis && !reportReady) {
 
         showMessage(
             "Please let ChronicAI understand and prepare the report before submitting."
@@ -1356,7 +1342,7 @@ async function submitReport() {
 
 
     // ========================================================
-    // VERIFY
+    // VERIFY REPORT
     // ========================================================
 
     if (
@@ -1379,14 +1365,20 @@ async function submitReport() {
     // ========================================================
 
     const description =
-        descriptionInput?.value
-            ?.trim() ||
-        "";
+        descriptionInput?.value?.trim() || "";
 
     const location =
-        locationInput?.value
-            ?.trim() ||
-        "";
+        locationInput?.value?.trim() || "";
+
+
+    if (!description && !selectedImageData) {
+
+        showMessage(
+            "Please provide a description or upload an image."
+        );
+
+        return;
+    }
 
 
     if (!location) {
@@ -1395,21 +1387,19 @@ async function submitReport() {
             "Location is required."
         );
 
+        locationInput?.focus();
+
         return;
     }
 
 
     // ========================================================
-    // START SUBMIT
+    // START SUBMISSION
     // ========================================================
 
-    isSubmitting =
-        true;
+    isSubmitting = true;
 
-    setSubmitLoading(
-        true
-    );
-
+    setSubmitLoading(true);
 
     showMessage(
         "Submitting your civic report...",
@@ -1420,32 +1410,59 @@ async function submitReport() {
     try {
 
         // ====================================================
-        // UID
+        // USER INFORMATION
         // ====================================================
+
+        const storedUser =
+            getStoredUser() || {};
 
         const uid =
             currentUser?.uid ||
-            getStoredUser()?.uid ||
-            localStorage.getItem(
-                "ChronicAIUserId"
-            ) ||
+            storedUser?.uid ||
+            localStorage.getItem("chronicAIUserId") ||
             "";
-
 
         const email =
             currentUser?.email ||
-            getCitizenEmail();
-
+            storedUser?.email ||
+            localStorage.getItem("chronicAIUserEmail") ||
+            "";
 
         const name =
             getCitizenName();
 
 
         // ====================================================
-        // REPORT DATA
+        // LOCATION COORDINATES
+        // ====================================================
+
+        /*
+         * These variables may or may not exist depending
+         * on whether the page has GPS functionality.
+         *
+         * We safely read them from window so the submit
+         * function NEVER crashes because of an undefined
+         * latitude/longitude variable.
+         */
+
+        const latitude =
+            typeof window.currentLatitude !== "undefined"
+                ? window.currentLatitude
+                : null;
+
+        const longitude =
+            typeof window.currentLongitude !== "undefined"
+                ? window.currentLongitude
+                : null;
+
+
+        // ====================================================
+        // REPORT PAYLOAD
         // ====================================================
 
         const reportPayload = {
+
+            uid: uid,
 
             reporterName:
                 name,
@@ -1453,90 +1470,122 @@ async function submitReport() {
             reporterEmail:
                 email,
 
-            citizenUid:
-                uid,
+            email:
+                email,
 
-            description,
+            description:
+                description,
 
-            location,
+            location:
+                location,
+
+            latitude:
+                latitude,
+
+            longitude:
+                longitude,
 
             image:
-                selectedImageData ||
-                null,
+                selectedImageData || null,
 
             analysis:
-                currentAnalysis,
+                currentAnalysis || null,
 
             conversation:
-
                 conversation,
 
+            reportReady:
+                reportReady,
+
             submittedAt:
-                new Date()
-                    .toISOString()
+                new Date().toISOString()
+
         };
 
 
+        console.log(
+            "ChronicAI: Sending report payload:",
+            reportPayload
+        );
+
+
         // ====================================================
-        // SUBMIT TO SERVER
+        // SUBMIT TO BACKEND
         // ====================================================
 
         const response =
             await fetch(
                 `${API_BASE}/api/reports`,
                 {
-
-                    method:
-                        "POST",
+                    method: "POST",
 
                     headers: {
-
-                        "Content-Type":
-                            "application/json"
-
+                        "Content-Type": "application/json"
                     },
 
                     body:
                         JSON.stringify(
                             reportPayload
                         )
-
                 }
             );
 
 
         // ====================================================
-        // RESPONSE
+        // READ RESPONSE
         // ====================================================
 
-        let data;
+        const responseText =
+            await response.text();
+
+        let data = {};
 
         try {
 
             data =
-                await response.json();
+                responseText
+                    ? JSON.parse(responseText)
+                    : {};
 
         } catch (jsonError) {
 
+            console.error(
+                "ChronicAI invalid server response:",
+                responseText
+            );
+
             throw new Error(
-                "Server returned an invalid response."
+                `Server returned an invalid response (${response.status}).`
             );
         }
 
 
         // ====================================================
-        // ERROR
+        // HTTP ERROR
+        // ====================================================
+
+        if (!response.ok) {
+
+            throw new Error(
+                data?.error ||
+                data?.message ||
+                `Report API returned ${response.status}.`
+            );
+        }
+
+
+        // ====================================================
+        // BACKEND ERROR
         // ====================================================
 
         if (
-            !response.ok ||
-            !data.success
+            data.success === false
         ) {
 
             throw new Error(
                 data?.error ||
                 data?.message ||
-                "Unable to submit report."
+                "The server rejected the report."
             );
         }
 
@@ -1548,6 +1597,8 @@ async function submitReport() {
         const reportId =
             data.reportId ||
             data.report?.reportId ||
+            data.report?.id ||
+            data.id ||
             "";
 
 
@@ -1558,7 +1609,6 @@ async function submitReport() {
                 : "Report submitted successfully.",
 
             "success"
-
         );
 
 
@@ -1566,9 +1616,7 @@ async function submitReport() {
         // UPDATE USER REPORT COUNT
         // ====================================================
 
-        if (
-            uid
-        ) {
+        if (uid) {
 
             try {
 
@@ -1576,9 +1624,7 @@ async function submitReport() {
                     uid
                 );
 
-            } catch (
-                profileError
-            ) {
+            } catch (profileError) {
 
                 console.warn(
                     "Unable to update citizen report count:",
@@ -1592,12 +1638,10 @@ async function submitReport() {
         // SAVE LAST REPORT
         // ====================================================
 
-        if (
-            data.report
-        ) {
+        if (data.report) {
 
             localStorage.setItem(
-                "ChronicAILastReport",
+                "chronicAILastReport",
                 JSON.stringify(
                     data.report
                 )
@@ -1605,27 +1649,22 @@ async function submitReport() {
         }
 
 
-        if (
-            reportId
-        ) {
+        if (reportId) {
 
             localStorage.setItem(
-                "ChronicAILastReportId",
+                "chronicAILastReportId",
                 reportId
             );
         }
 
 
         // ====================================================
-        // DISABLE SUBMIT
+        // DISABLE SUBMIT BUTTON
         // ====================================================
 
-        if (
-            submitButton
-        ) {
+        if (submitButton) {
 
-            submitButton.disabled =
-                true;
+            submitButton.disabled = true;
 
             submitButton.innerHTML = `
                 <i class="fa-solid fa-check"></i>
@@ -1635,7 +1674,7 @@ async function submitReport() {
 
 
         console.log(
-            "ChronicAI report submitted:",
+            "ChronicAI report submitted successfully:",
             data
         );
 
@@ -1643,29 +1682,44 @@ async function submitReport() {
     } catch (error) {
 
         console.error(
-            "ChronicAI REPORT SUBMISSION ERROR:",
+            "CHRONICAI REPORT SUBMISSION ERROR:",
             error
         );
 
 
-        showMessage(
+        // ====================================================
+        // FRIENDLY ERROR
+        // ====================================================
+
+        let message =
             error?.message ||
-            "Unable to submit the civic report."
+            "Unable to submit the civic report.";
+
+
+        if (
+            message.includes("404") ||
+            message.toLowerCase().includes("not found")
+        ) {
+
+            message =
+                "Report API endpoint not found. Please make sure the ChronicAI backend server is running and the POST /api/reports route exists.";
+        }
+
+
+        showMessage(
+            message
         );
 
 
-        setSubmitLoading(
-            false
-        );
+        // Allow retry
+        setSubmitLoading(false);
 
 
     } finally {
 
-        isSubmitting =
-            false;
+        isSubmitting = false;
     }
 }
-
 
 // ============================================================
 // UPDATE CITIZEN REPORT COUNT
@@ -1907,7 +1961,7 @@ console.log(
 );
 
 console.log(
-    "ChronicAI REPORT PROBLEM MODULE"
+    "CHRONICAI REPORT PROBLEM MODULE"
 );
 
 console.log(

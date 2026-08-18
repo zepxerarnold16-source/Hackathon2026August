@@ -10,7 +10,7 @@
 // 5. User Profile Display
 // 6. Protected Pages
 // 7. Report Problem
-// 8. AI Civic Analysis
+// 8. AI Chronic Analysis
 // 9. Citizen Verification
 // 10. Report Submission
 // 11. Report Status
@@ -114,31 +114,31 @@ const API_BASE =
 const SESSION_KEYS = {
 
     user:
-        "ChronicAIUser",
+        "chronicAIUser",
 
     loggedIn:
-        "ChronicAILoggedIn",
+        "chronicAILoggedIn",
 
     userId:
-        "ChronicAIUserId",
+        "chronicAIUserId",
 
     userEmail:
-        "ChronicAIUserEmail",
+        "chronicAIUserEmail",
 
     userName:
-        "ChronicAIUserName",
+        "chronicAIUserName",
 
     role:
-        "ChronicAIRole",
+        "chronicAIRole",
 
     lastReport:
-        "ChronicAILastReport",
+        "chronicAILastReport",
 
     currentAnalysis:
-        "ChronicAICurrentAnalysis",
+        "chronicAICurrentAnalysis",
 
     theme:
-        "ChronicAITheme"
+        "chronicAITheme"
 
 };
 
@@ -400,7 +400,7 @@ function showToast(
 ) {
 
     let toast =
-        $("civicToast");
+        $("chronicToast");
 
     if (!toast) {
 
@@ -410,10 +410,10 @@ function showToast(
             );
 
         toast.id =
-            "civicToast";
+            "chronicToast";
 
         toast.className =
-            "civic-toast";
+            "chronic-toast";
 
         document.body.appendChild(
             toast
@@ -1069,7 +1069,7 @@ function runAuthGuard() {
     ) {
 
         sessionStorage.setItem(
-            "ChronicAIRedirectAfterLogin",
+            "civicAIRedirectAfterLogin",
             currentPage
         );
 
@@ -1214,7 +1214,7 @@ async function apiRequest(
 }
 
 // ============================================================
-// ANALYZE CIVIC REPORT
+// ANALYZE CHRONIC REPORT
 // ============================================================
 
 async function analyzeReport({
@@ -3801,7 +3801,7 @@ async function initializeApp() {
     );
 
     console.log(
-        "ChronicAI MAIN APPLICATION STARTING"
+        "CHRONICAI MAIN APPLICATION STARTING"
     );
 
     console.log(
@@ -3878,7 +3878,7 @@ async function initializeApp() {
     hidePageLoader();
 
     document.body.classList.add(
-        "ChronicAI-ready"
+        "chronicai-ready"
     );
 
     console.log(
@@ -3886,7 +3886,7 @@ async function initializeApp() {
     );
 
     console.log(
-        "ChronicAI MAIN APPLICATION READY"
+        "CHRONICAI MAIN APPLICATION READY"
     );
 
     console.log(

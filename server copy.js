@@ -1,5 +1,5 @@
 // ============================================================
-//  CHRONICAI — FINAL COMPLETE SERVER.JS
+// CHRONICAI — FINAL COMPLETE SERVER.JS
 // ============================================================
 //
 // CHRONICAI BACKEND
@@ -13,7 +13,7 @@
 // AUTHORITY ASSISTANT   -> GROQ
 // IMAGE CHAT            -> GROQ VISION
 //
-// CIVIC REPORT ANALYSIS -> GEMINI
+// CHRONIC REPORT ANALYSIS -> GEMINI
 // PRODUCT SCANNER       -> GEMINI
 //
 // EMAIL OTP             -> GMAIL / NODEMAILER
@@ -237,7 +237,7 @@ function imageToGeminiPart(image) {
 // ============================================================
 //
 // ONLY:
-// Civic Report Analysis
+// CHRONIC Report Analysis
 // Product Scanner
 //
 // ============================================================
@@ -988,7 +988,7 @@ async function callGroq({
 
 const NORMAL_CHAT_PROMPT = `
 
-You are     ChronicAI AI Life Helper.
+You are ChronicAI AI Life Helper.
 
 You are the main conversational AI assistant
 inside the ChronicAI website.
@@ -1599,7 +1599,7 @@ app.post("/api/chat", async (req, res) => {
             {
                 role: "system",
                 content: `
-You are ChronicAI, an AI-powered chronic assistant.
+You are ChronicAI, an AI-powered civic assistant.
 
 Help citizens with:
 - civic problems
@@ -1781,73 +1781,6 @@ function getGeminiError(text) {
 
     }
 
-}
-// ============================================================
-// GEMINI RESPONSE TEXT EXTRACTOR
-// ============================================================
-
-function extractGeminiText(data) {
-    try {
-        if (!data) {
-            return "";
-        }
-
-        // Standard Gemini REST API response
-        const parts =
-            data?.candidates?.[0]?.content?.parts;
-
-        if (Array.isArray(parts)) {
-            const text = parts
-                .map(part => {
-                    if (typeof part?.text === "string") {
-                        return part.text;
-                    }
-
-                    return "";
-                })
-                .join("")
-                .trim();
-
-            if (text) {
-                return text;
-            }
-        }
-
-        // Direct text fallback
-        if (typeof data?.text === "string") {
-            return data.text.trim();
-        }
-
-        // Response object fallback
-        if (
-            typeof data?.response?.text === "function"
-        ) {
-            const text =
-                data.response.text();
-
-            if (typeof text === "string") {
-                return text.trim();
-            }
-        }
-
-        // Some Gemini response formats
-        if (
-            typeof data?.candidates?.[0]?.output === "string"
-        ) {
-            return data.candidates[0].output.trim();
-        }
-
-        return "";
-
-    } catch (error) {
-
-        console.error(
-            "GEMINI TEXT EXTRACTION ERROR:",
-            error?.message || error
-        );
-
-        return "";
-    }
 }
 
 // ============================================================
@@ -2057,11 +1990,6 @@ async function callGemini({
 
             if (!answer) {
 
-                console.error(
-                    "GEMINI EMPTY RESPONSE:",
-                    JSON.stringify(data, null, 2)
-                );
-
                 throw new Error(
                     "Gemini returned an empty response."
                 );
@@ -2106,162 +2034,65 @@ async function callGemini({
 // ============================================================
 // JSON PARSER
 // ============================================================
-// ============================================================
-// ROBUST AI JSON PARSER
-// ============================================================
 
 function parseAIJSON(text) {
 
-    if (text === undefined || text === null) {
-        throw new Error("AI returned empty response.");
-    }
+    let cleaned =
+        cleanText(text);
 
-    let cleaned = String(text)
-        .trim()
-        .replace(/^\uFEFF/, "");
-
-    // Remove markdown code fences
-    cleaned = cleaned
-        .replace(/^```json\s*/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/\s*```$/i, "")
-        .trim();
-
-    // --------------------------------------------------------
-    // 1. Direct JSON
-    // --------------------------------------------------------
+    cleaned =
+        cleaned
+            .replace(
+                /^```json\s*/i,
+                ""
+            )
+            .replace(
+                /^```\s*/i,
+                ""
+            )
+            .replace(
+                /\s*```$/i,
+                ""
+            );
 
     try {
-        return JSON.parse(cleaned);
-    } catch (_) {}
 
-    // --------------------------------------------------------
-    // 2. Extract JSON object
-    // --------------------------------------------------------
-
-    const objectStart = cleaned.indexOf("{");
-    const objectEnd = cleaned.lastIndexOf("}");
-
-    if (
-        objectStart !== -1 &&
-        objectEnd !== -1 &&
-        objectEnd > objectStart
-    ) {
-        const candidate = cleaned
-            .slice(objectStart, objectEnd + 1)
-            .trim();
-
-        try {
-            return JSON.parse(candidate);
-        } catch (_) {}
-    }
-
-    // --------------------------------------------------------
-    // 3. Extract JSON array
-    // --------------------------------------------------------
-
-    const arrayStart = cleaned.indexOf("[");
-    const arrayEnd = cleaned.lastIndexOf("]");
-
-    if (
-        arrayStart !== -1 &&
-        arrayEnd !== -1 &&
-        arrayEnd > arrayStart
-    ) {
-        const candidate = cleaned
-            .slice(arrayStart, arrayEnd + 1)
-            .trim();
-
-        try {
-            return JSON.parse(candidate);
-        } catch (_) {}
-    }
-
-    // --------------------------------------------------------
-    // 4. Try removing common AI prefixes
-    // --------------------------------------------------------
-
-    const prefixes = [
-        "Here is the JSON:",
-        "Here is the JSON",
-        "JSON:",
-        "Response:",
-        "Result:"
-    ];
-
-    for (const prefix of prefixes) {
-
-        if (
+        return JSON.parse(
             cleaned
-                .toLowerCase()
-                .startsWith(prefix.toLowerCase())
-        ) {
-
-            const candidate =
-                cleaned
-                    .slice(prefix.length)
-                    .trim();
-
-            try {
-                return JSON.parse(candidate);
-            } catch (_) {}
-
-            const start =
-                candidate.indexOf("{");
-
-            const end =
-                candidate.lastIndexOf("}");
-
-            if (
-                start !== -1 &&
-                end > start
-            ) {
-                try {
-                    return JSON.parse(
-                        candidate.slice(
-                            start,
-                            end + 1
-                        )
-                    );
-                } catch (_) {}
-            }
-        }
-    }
-
-    // --------------------------------------------------------
-    // DEBUG
-    // --------------------------------------------------------
-
-    console.error(
-        "\n================================================"
-    );
-
-    console.error(
-        "❌ AI JSON PARSE FAILED"
-    );
-
-    console.error(
-        "RAW AI RESPONSE:"
-    );
-
-    console.error(
-        cleaned.substring(0, 2000)
-    );
-
-    if (cleaned.length > 2000) {
-        console.error(
-            `... (${cleaned.length - 2000} more characters)`
         );
-    }
 
-    console.error(
-        "================================================\n"
-    );
+    } catch {}
+
+    const start =
+        cleaned.indexOf("{");
+
+    const end =
+        cleaned.lastIndexOf("}");
+
+    if (
+        start !== -1 &&
+        end > start
+    ) {
+
+        try {
+
+            return JSON.parse(
+                cleaned.slice(
+                    start,
+                    end + 1
+                )
+            );
+
+        } catch {}
+
+    }
 
     throw new Error(
         "AI returned invalid JSON."
     );
+
 }
+
 // ============================================================
 // CIVIC REPORT PROMPT
 // ============================================================
@@ -2541,7 +2372,7 @@ Analyze this civic report.
         } catch (error) {
 
             console.error(
-                "GEMINI CHRONIC ANALYSIS ERROR:",
+                "GEMINI CIVIC ANALYSIS ERROR:",
                 error?.message || error
             );
 
@@ -2567,7 +2398,7 @@ Analyze this civic report.
 
                     error:
                         message ||
-                        "Chronic analysis failed.",
+                        "Civic analysis failed.",
 
                     code:
                         message.includes("429")
@@ -4052,11 +3883,6 @@ async function sendEmailOtp(
         otp
     );
 
-    // DEBUG: Log OTP for development
-    console.log(
-        `\n📧 OTP Generated for ${email}: ${otp}\n`
-    );
-
     await emailTransporter.sendMail({
 
         from:
@@ -4134,385 +3960,6 @@ async function sendEmailOtp(
             `
 
     });
-
-}
-
-
-
-async function handleOtpSendRequest(
-    req,
-    res
-) {
-
-    try {
-
-        const rawType =
-            cleanText(
-                req.body?.type
-            )
-            .toLowerCase();
-
-        const type =
-            rawType === "email" || rawType === "phone"
-                ? rawType
-                : req.body?.email
-                    ? "email"
-                    : req.body?.phone
-                        ? "phone"
-                        : "";
-
-        let identifier =
-            cleanText(
-                req.body?.identifier ?? req.body?.email ?? req.body?.phone
-            );
-
-        if (
-            !type
-        ) {
-
-            return res
-                .status(400)
-                .json({
-
-                    success:
-                        false,
-
-                    error:
-                        "OTP type must be email or phone."
-
-                });
-
-        }
-
-        if (
-            type === "email"
-        ) {
-
-            identifier =
-                normalizeEmail(
-                    identifier
-                );
-
-            if (
-                !isValidEmail(
-                    identifier
-                )
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-
-                        success:
-                            false,
-
-                        error:
-                            "Valid email is required."
-
-                    });
-
-            }
-
-        } else {
-
-            identifier =
-                normalizePhone(
-                    identifier
-                );
-
-            if (
-                !isValidPhone(
-                    identifier
-                )
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-
-                        success:
-                            false,
-
-                        error:
-                            "Use a valid phone number with country code. Example: +919876543210"
-
-                    });
-
-            }
-
-        }
-
-        const rate =
-            checkOtpRequestRate(
-                identifier
-            );
-
-        if (
-            !rate.allowed
-        ) {
-
-            if (
-                rate.retryAfter
-            ) {
-
-                res.setHeader(
-                    "Retry-After",
-                    String(
-                        rate.retryAfter
-                    )
-                );
-
-            }
-
-            return res
-                .status(429)
-                .json({
-
-                    success:
-                        false,
-
-                    error:
-                        rate.error,
-
-                    code:
-                        "OTP_RATE_LIMIT"
-
-                });
-
-        }
-
-        if (
-            type === "email"
-        ) {
-
-            await sendEmailOtp(
-                identifier
-            );
-
-        } else {
-
-            await sendPhoneOtp(
-                identifier
-            );
-
-        }
-
-        return res.json({
-
-            success:
-                true,
-
-            message:
-                `OTP sent successfully to your ${type}.`,
-
-            type,
-            identifier
-
-        });
-
-    } catch (error) {
-
-        console.error(
-            "OTP SEND ERROR:",
-            error?.message || error
-        );
-
-        return res
-            .status(500)
-            .json({
-
-                success:
-                    false,
-
-                error:
-                    "Failed to send OTP.",
-
-                code:
-                    "OTP_SEND_ERROR"
-
-            });
-
-    }
-
-}
-
-
-
-function handleOtpVerifyRequest(
-    req,
-    res
-) {
-
-    try {
-
-        const rawType =
-            cleanText(
-                req.body?.type
-            )
-            .toLowerCase();
-
-        const type =
-            rawType === "email" || rawType === "phone"
-                ? rawType
-                : req.body?.email
-                    ? "email"
-                    : req.body?.phone
-                        ? "phone"
-                        : "";
-
-        let identifier =
-            cleanText(
-                req.body?.identifier ?? req.body?.email ?? req.body?.phone
-            );
-
-        const otp =
-            cleanText(
-                req.body?.otp
-            );
-
-        if (
-            !type
-        ) {
-
-            return res
-                .status(400)
-                .json({
-
-                    success:
-                        false,
-
-                    error:
-                        "OTP type must be email or phone."
-
-                });
-
-        }
-
-        if (
-            !otp
-        ) {
-
-            return res
-                .status(400)
-                .json({
-
-                    success:
-                        false,
-
-                    error:
-                        "OTP is required."
-
-                });
-
-        }
-
-        if (
-            !/^\d{6}$/.test(
-                otp
-            )
-        ) {
-
-            return res
-                .status(400)
-                .json({
-
-                    success:
-                        false,
-
-                    error:
-                        "OTP must contain exactly 6 digits."
-
-                });
-
-        }
-
-        identifier =
-            type === "email"
-                ? normalizeEmail(
-                    identifier
-                )
-                : normalizePhone(
-                    identifier
-                );
-
-        const result =
-            verifyStoredOtp(
-                identifier,
-                otp
-            );
-
-        if (
-            !result.success
-        ) {
-
-            return res
-                .status(400)
-                .json({
-
-                    success:
-                        false,
-
-                    verified:
-                        false,
-
-                    error:
-                        result.error,
-
-                    code:
-                        result.code,
-
-                    attemptsRemaining:
-                        result.attemptsRemaining
-
-                });
-
-        }
-
-        return res.json({
-
-            success:
-                true,
-
-            verified:
-                true,
-
-            type,
-            identifier,
-
-            verificationToken:
-                result.verificationToken,
-
-            message:
-                `${type === "email" ? "Email" : "Phone"} verified successfully.`
-
-        });
-
-    } catch (error) {
-
-        console.error(
-            "OTP VERIFY ERROR:",
-            error?.message || error
-        );
-
-        return res
-            .status(500)
-            .json({
-
-                success:
-                    false,
-
-                verified:
-                    false,
-
-                error:
-                    "OTP verification failed.",
-
-                code:
-                    "OTP_VERIFY_ERROR"
-
-            });
-
-    }
 
 }
 
@@ -4756,17 +4203,179 @@ app.post(
 
 app.post(
     "/api/otp/verify",
-    handleOtpVerifyRequest
-);
+    (req, res) => {
 
-app.post(
-    "/api/auth/send-otp",
-    handleOtpSendRequest
-);
+        try {
 
-app.post(
-    "/api/auth/verify-otp",
-    handleOtpVerifyRequest
+            const type =
+                cleanText(
+                    req.body?.type
+                )
+                .toLowerCase();
+
+            let identifier =
+                cleanText(
+                    req.body?.identifier
+                );
+
+            const otp =
+                cleanText(
+                    req.body?.otp
+                );
+
+            if (
+                type !== "email" &&
+                type !== "phone"
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success:
+                            false,
+
+                        error:
+                            "OTP type must be email or phone."
+
+                    });
+
+            }
+
+            if (!otp) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success:
+                            false,
+
+                        error:
+                            "OTP is required."
+
+                    });
+
+            }
+
+            if (
+                !/^\d{6}$/.test(
+                    otp
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success:
+                            false,
+
+                        error:
+                            "OTP must contain exactly 6 digits."
+
+                    });
+
+            }
+
+            // ------------------------------------------------
+            // NORMALIZE IDENTIFIER
+            // ------------------------------------------------
+
+            identifier =
+                type === "email"
+                    ? normalizeEmail(
+                        identifier
+                    )
+                    : normalizePhone(
+                        identifier
+                    );
+
+            // ------------------------------------------------
+            // VERIFY
+            // ------------------------------------------------
+
+            const result =
+                verifyStoredOtp(
+                    identifier,
+                    otp
+                );
+
+            if (
+                !result.success
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success:
+                            false,
+
+                        verified:
+                            false,
+
+                        error:
+                            result.error,
+
+                        code:
+                            result.code,
+
+                        attemptsRemaining:
+                            result.attemptsRemaining
+
+                    });
+
+            }
+
+            return res.json({
+
+                success:
+                    true,
+
+                verified:
+                    true,
+
+                type,
+
+                identifier,
+
+                verificationToken:
+                    result.verificationToken,
+
+                message:
+                    `${type === "email" ? "Email" : "Phone"} verified successfully.`
+
+            });
+
+        } catch (error) {
+
+            console.error(
+                "OTP VERIFY ERROR:",
+                error?.message || error
+            );
+
+            return res
+                .status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    verified:
+                        false,
+
+                    error:
+                        "OTP verification failed.",
+
+                    code:
+                        "OTP_VERIFY_ERROR"
+
+                });
+
+        }
+
+    }
 );
 
 
@@ -5307,7 +4916,7 @@ function writeReports(
 
 app.post(
     "/api/reports",
-    async (req, res) => {
+    (req, res) => {
 
         try {
 
@@ -5542,119 +5151,6 @@ app.post(
             writeReports(
                 reports
             );
-
-            // ------------------------------------------------
-            // SEND ADMIN EMAIL NOTIFICATION
-            // ------------------------------------------------
-
-            if (emailTransporter) {
-                try {
-                    const adminEmail = EMAIL_FROM;
-                    const reportUrl = `http://localhost:${PORT}/api/reports/${report.reportId}`;
-                    
-                    const adminEmailText = `
-
-NEW CHRONICAI CIVIC REPORT SUBMITTED
-
-========================================
-
-Report ID:
-${report.reportId}
-
-Citizen Name:
-${report.reporterName}
-
-Email:
-${report.email || "Not provided"}
-
-Phone:
-${report.phone || "Not provided"}
-
-Location:
-${report.location || "Not provided"}
-
-Verification Method:
-${report.verificationMethod}
-
-========================================
-
-PROBLEM DESCRIPTION
-
-${report.description || "Not provided"}
-
-========================================
-
-AI ANALYSIS
-
-Problem Category:
-${report.analysis?.category || "Not available"}
-
-Severity:
-${report.analysis?.severity || "Not available"}
-
-Risk Level:
-${report.analysis?.risk || "Not available"}
-
-Summary:
-${report.analysis?.summary || "Not available"}
-
-Recommendation:
-${report.analysis?.recommendation || "Not available"}
-
-Responsible Department:
-${report.analysis?.department || "Not available"}
-
-========================================
-
-VIEW FULL REPORT
-
-${reportUrl}
-
-========================================
-
-This notification was generated by ChronicAI.
-`;
-
-                    await emailTransporter.sendMail({
-                        from: EMAIL_FROM,
-                        to: adminEmail,
-                        subject: `🚨 ChronicAI New Report: ${report.analysis?.category || "Civic Issue"} - ${report.reportId}`,
-                        text: adminEmailText,
-                        html: `
-                            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                                <h2 style="color: #d9534f;">🚨 NEW ChronicAI REPORT</h2>
-                                <p><strong>Report ID:</strong> ${report.reportId}</p>
-                                <p><strong>Citizen:</strong> ${report.reporterName}</p>
-                                <p><strong>Email:</strong> ${report.email || "Not provided"}</p>
-                                <p><strong>Location:</strong> ${report.location || "Not provided"}</p>
-                                <hr />
-                                <h3>Problem</h3>
-                                <p>${report.description || "Not provided"}</p>
-                                <h3>Analysis</h3>
-                                <ul>
-                                    <li><strong>Category:</strong> ${report.analysis?.category || "N/A"}</li>
-                                    <li><strong>Severity:</strong> ${report.analysis?.severity || "N/A"}</li>
-                                    <li><strong>Risk:</strong> ${report.analysis?.risk || "N/A"}</li>
-                                    <li><strong>Department:</strong> ${report.analysis?.department || "N/A"}</li>
-                                </ul>
-                                <p><strong>Recommendation:</strong> ${report.analysis?.recommendation || "N/A"}</p>
-                                <hr />
-                                <p><a href="${reportUrl}" style="background: #5cb85c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Full Report</a></p>
-                            </div>
-                        `
-                    });
-
-                    console.log(
-                        `\n📧 Admin notification sent for report ${report.reportId}\n`
-                    );
-                } catch (emailError) {
-                    console.error(
-                        "ADMIN EMAIL NOTIFICATION ERROR:",
-                        emailError?.message || emailError
-                    );
-                    // Don't fail the report submission if email fails
-                }
-            }
 
             // ------------------------------------------------
             // RESPONSE
@@ -6640,7 +6136,7 @@ app.listen(
 
         console.log(
 
-            "Chronic Report AI    :",
+            "Civic Report AI    :",
 
             hasGeminiKey()
                 ? `GEMINI (${GEMINI_MODEL})`

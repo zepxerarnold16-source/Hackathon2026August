@@ -1084,7 +1084,7 @@
 
                     <span class="dot"></span>
 
-                    ChronicAI VISION AI
+                    CHRONICAI VISION AI
 
                 </div>
 
@@ -1624,18 +1624,8 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================================================
-       CHRONICAI FAST PRODUCT SCANNER
+       CHRONICAI — FAST PRODUCT AI SCANNER
        Optimized Frontend
-       
-       BACKEND ENDPOINTS:
-       - GET  /api/health → Server status check
-       - POST /api/analyze-product → AI image analysis (Gemini)
-       - POST /api/product-question → Q&A about product (Groq)
-       
-       CONFIGURATION:
-       - API_BASE uses window.location.origin for relative URLs
-       - Images compressed to 1280x1280, JPEG quality 0.78
-       - Base64 data URLs sent to backend
        ========================================================= */
 
     /* =========================================================
@@ -1725,21 +1715,8 @@ document.addEventListener("DOMContentLoaded", () => {
        API
        ========================================================= */
 
-    /*
-     * CHRONICAI API BASE URL
-     *
-     * Automatically detects the correct API endpoint.
-     * Uses current origin by default (same server).
-     */
-
     const API_BASE =
-        window.CHRONICAI_API_URL ||
-        window.location.origin;
-
-    console.log(
-        "API_BASE:",
-        API_BASE
-    );
+        window.CHRONICAI_API_URL || "";
 
 
     /* =========================================================
@@ -1831,7 +1808,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             if (!response.ok) {
-                
+
                 throw new Error(
                     data.error ||
                     `Health check failed: ${response.status}`
@@ -2520,7 +2497,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             /*
              * Maximum frontend wait:
-             * 35 seconds.
+             * 90 seconds.
              */
 
             const timeout =
@@ -2528,7 +2505,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     () => {
                         controller.abort();
                     },
-                    35000
+                    90000
                 );
 
 
@@ -2552,7 +2529,13 @@ document.addEventListener("DOMContentLoaded", () => {
                             JSON.stringify({
 
                                 image:
-                                    selectedImageBase64
+                                    selectedImageBase64,
+
+                                productName:
+                                    selectedFile?.name || "",
+
+                                description:
+                                    ""
 
                             }),
 
@@ -2654,6 +2637,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 "ChronicAI product analysis failed:",
                 error
             );
+
+            /* Frontend timeout cleanup */
+            if (typeof timeout !== "undefined") {
+                clearTimeout(timeout);
+            }
 
 
             aiLoading.classList.remove(
@@ -3087,7 +3075,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
 
             message =
-                "AI analysis took too long. Please try again with a clearer product image.";
+                "AI analysis timed out. Please try again. The image was already optimized before upload.";
 
         }
 
@@ -3201,10 +3189,14 @@ document.addEventListener("DOMContentLoaded", () => {
                                 question:
                                     question,
 
-                                product:
+                                productName:
                                     currentAnalysis
                                         ?.productName ||
-                                    ""
+                                    "",
+
+                                product:
+                                    currentAnalysis ||
+                                    null
 
                             }),
 
@@ -3554,7 +3546,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     console.log(
-        "ChronicAI FAST PRODUCT SCANNER"
+        "CHRONICAI FAST PRODUCT SCANNER"
     );
 
     console.log(
