@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+
 <title>ChronicAI — AI Life Helper</title>
 
 <link
@@ -37,6 +39,7 @@ html,
 body{
     width:100%;
     height:100%;
+    min-height:100%;
 }
 
 body{
@@ -71,6 +74,7 @@ button{
 
 .app{
     height:100vh;
+    min-height:100dvh;
     display:flex;
 }
 
@@ -1296,6 +1300,41 @@ button{
    MOBILE
 ========================================================= */
 
+/* =========================================================
+   LIGHT THEME
+   The original JavaScript toggled .light-mode, but no CSS rules
+   existed for it, so the theme button changed state without changing
+   the visual theme.
+========================================================= */
+body.light-mode{
+    --bg:#f5f7fb;
+    --panel:#ffffff;
+    --panel2:#eef2f8;
+    --text:#111827;
+    --text2:#536176;
+    --muted:#718096;
+    --border:rgba(15,23,42,.10);
+    --border2:rgba(15,23,42,.16);
+}
+body.light-mode .sidebar{background:rgba(255,255,255,.94);}
+body.light-mode .header{background:rgba(245,247,251,.82);}
+body.light-mode .message-bubble{background:rgba(15,23,42,.045);color:#1f2937;}
+body.light-mode .message.user .message-bubble{background:linear-gradient(135deg,rgba(91,124,255,.15),rgba(124,92,255,.12));}
+body.light-mode .input-container{background:rgba(255,255,255,.94);}
+body.light-mode .search-box input,
+body.light-mode .new-chat,
+body.light-mode .chat-input{color:#111827;}
+body.light-mode .chat-input::placeholder{color:#8a94a6;}
+body.light-mode .sidebar-btn,
+body.light-mode .icon-btn,
+body.light-mode .tool-btn{color:#536176;}
+body.light-mode .sidebar-btn:hover,
+body.light-mode .icon-btn:hover,
+body.light-mode .tool-btn:hover,
+body.light-mode .tool-btn.active{color:#111827;}
+body.light-mode .message-bubble pre{background:#eef2f7;color:#111827;}
+body.light-mode .input-wrapper{background:linear-gradient(to top,var(--bg) 65%,transparent);}
+
 @media(max-width:1120px){
 
     .assistant-dock{
@@ -1312,6 +1351,17 @@ button{
 }
 
 @media(max-width:850px){
+
+    html,
+    body{
+        height:100%;
+        overflow:hidden;
+    }
+
+    .app{
+        height:100dvh;
+        min-height:100dvh;
+    }
 
     .sidebar{
 
@@ -1358,6 +1408,9 @@ button{
             15px
             10px
             18px;
+
+        padding-bottom:
+            max(18px, env(safe-area-inset-bottom));
     }
 
     .message-body{
@@ -1375,6 +1428,33 @@ button{
 }
 
 @media(max-width:600px){
+
+    .chat-area{
+        padding-bottom:190px;
+    }
+
+    .input-row{
+        gap:4px;
+        padding:8px;
+    }
+
+    .input-actions{
+        gap:0;
+    }
+
+    .tool-btn{
+        width:34px;
+        height:38px;
+    }
+
+    .chat-input{
+        font-size:16px;
+    }
+
+    .send-btn{
+        flex:0 0 40px;
+        width:40px;
+    }
 
     .assistant-dock{
 
@@ -1861,6 +1941,25 @@ document.addEventListener("DOMContentLoaded", () => {
     */
     const TRANSCRIBE_API_ENDPOINT = "/api/transcribe";
 
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 60000) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+            return await fetch(url, {
+                ...options,
+                signal: controller.signal
+            });
+        } catch (error) {
+            if (error?.name === "AbortError") {
+                throw new Error("The request timed out. Please try again.");
+            }
+            throw error;
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
 
     /* =========================================================
        STORAGE
@@ -1916,6 +2015,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let isSpeaking = false;
 
+    let stopCommandRecognition = null;
+    let stopCommandRequested = false;
+    let activeNarrationText = "";
+    // Last text spoken by the AI narrator. Used as an acoustic-echo safety net.
+    let lastNarrationText = "";
+    let lastNarrationAt = 0;
+    const NARRATION_ECHO_WINDOW_MS = 12000;
+    const NARRATION_RESTART_COOLDOWN_MS = 1200;
+
 
     /* =========================================================
        VOICE SETTINGS
@@ -1963,10 +2071,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!Array.isArray(messages)) {
                 messages = [];
+            } else {
+                messages = messages
+                    .filter(message =>
+                        message &&
+                        (message.role === "user" || message.role === "ai") &&
+                        typeof message.content === "string" &&
+                        message.content.trim()
+                    )
+                    .slice(-100)
+                    .map(message => ({
+                        role: message.role,
+                        content: message.content,
+                        time: Number.isFinite(message.time)
+                            ? message.time
+                            : Date.now()
+                    }));
             }
 
             if (!Array.isArray(recentSearches)) {
                 recentSearches = [];
+            } else {
+                recentSearches = recentSearches
+                    .filter(item => typeof item === "string" && item.trim())
+                    .map(item => item.trim())
+                    .slice(0, 8);
             }
 
         } catch {
@@ -2416,7 +2545,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chatInput.addEventListener(
             "input",
-            resize
+            () => {
+
+                interruptNarration();
+
+                resize();
+
+            }
         );
 
 
@@ -2431,12 +2566,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     event.preventDefault();
 
+                    interruptNarration();
+
                     sendMessage();
 
                 }
 
             }
         );
+
+    }
+
+
+    if (sendButton) {
+
+        sendButton.onclick =
+            () => {
+
+                sendMessage();
+
+            };
 
     }
 
@@ -2567,7 +2716,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             const response =
-                await fetch(
+                await fetchWithTimeout(
                     ANALYZE_API_ENDPOINT,
                     {
                         method: "POST",
@@ -2627,7 +2776,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const response =
-            await fetch(
+            await fetchWithTimeout(
                 CHAT_API_ENDPOINT,
                 {
                     method: "POST",
@@ -2664,6 +2813,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ========================================================= */
 
     async function sendMessage() {
+
+        interruptNarration();
 
         if (isSending) return;
 
@@ -3386,6 +3537,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!clean) return;
 
 
+        /*
+           Release the microphone before speaking so the recorder
+           cannot submit the assistant's own voice as user input.
+        */
+        stopAllMicrophone();
+
+
         speechGeneration++;
 
         const generation =
@@ -3409,6 +3567,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const finalLanguage =
             normalizeLanguage(language) ||
             detectLanguageFromText(clean);
+
+
+        isSpeaking = true;
+
+        startStopCommandListener();
 
 
         speakNext(
@@ -3447,7 +3610,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!speechQueue.length) {
 
+            stopStopCommandListener();
+
             stopSpeakingUI();
+
+            restartMicrophone();
 
             /*
                IMPORTANT:
@@ -3463,6 +3630,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const sentence =
             speechQueue.shift();
+
+        activeNarrationText =
+            cleanForSpeech(sentence)
+                .toLowerCase();
+
+        lastNarrationText = activeNarrationText;
+        lastNarrationAt = Date.now();
 
 
         const utterance =
@@ -3510,6 +3684,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         utterance.onstart = () => {
 
+            if (
+                generation !== speechGeneration ||
+                !voiceMode
+            ) {
+                return;
+            }
+
             isSpeaking = true;
 
             aiOrb?.classList.add(
@@ -3519,53 +3700,72 @@ document.addEventListener("DOMContentLoaded", () => {
             voiceWave?.classList.add(
                 "show"
             );
-
         };
 
 
         utterance.onend = () => {
 
+            if (
+                generation !== speechGeneration ||
+                !voiceMode
+            ) {
+                return;
+            }
+
             isSpeaking = false;
+            activeNarrationText = "";
 
             try {
-
                 speechSynthesis.resume();
-
             } catch {}
-
 
             setTimeout(() => {
 
-                speakNext(
-                    generation,
-                    finalLanguage
-                );
+                if (generation === speechGeneration) {
+                    speakNext(
+                        generation,
+                        finalLanguage
+                    );
+                }
 
             }, 50);
-
         };
 
 
         utterance.onerror = error => {
+
+            if (
+                generation !== speechGeneration ||
+                !voiceMode
+            ) {
+                return;
+            }
 
             console.warn(
                 "TTS error:",
                 error
             );
 
-
             isSpeaking = false;
+            activeNarrationText = "";
 
+            if (
+                error?.error === "canceled" ||
+                error?.error === "interrupted"
+            ) {
+                return;
+            }
 
             setTimeout(() => {
 
-                speakNext(
-                    generation,
-                    finalLanguage
-                );
+                if (generation === speechGeneration) {
+                    speakNext(
+                        generation,
+                        finalLanguage
+                    );
+                }
 
             }, 50);
-
         };
 
 
@@ -3594,6 +3794,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function stopSpeakingUI() {
 
         isSpeaking = false;
+        activeNarrationText = "";
 
         aiOrb?.classList.remove(
             "speaking"
@@ -3602,6 +3803,276 @@ document.addEventListener("DOMContentLoaded", () => {
         voiceWave?.classList.remove(
             "show"
         );
+
+    }
+
+
+    function startStopCommandListener() {
+
+        const Recognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+
+        if (
+            !Recognition ||
+            stopCommandRecognition
+        ) {
+
+            return;
+
+        }
+
+
+        stopCommandRequested = false;
+
+        const recognition = new Recognition();
+
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-IN";
+
+        recognition.onresult = event => {
+
+            for (
+                let index = event.resultIndex;
+                index < event.results.length;
+                index++
+            ) {
+
+                const transcript =
+                    event.results[index][0]?.transcript
+                        ?.toLowerCase()
+                        .trim() || "";
+
+
+                if (
+                    isLikelyNarrationEcho(transcript)
+                ) {
+
+                    continue;
+
+                }
+
+
+                if (
+                    isStopCommand(transcript)
+                ) {
+
+                    stopStopCommandListener();
+                    interruptNarration();
+
+                    showToast("Narration stopped.");
+
+                    return;
+
+                }
+
+
+                if (
+                    !event.results[index].isFinal ||
+                    !transcript
+                ) {
+
+                    continue;
+
+                }
+
+
+                stopStopCommandListener();
+                interruptNarration(false);
+
+
+                if (chatInput) {
+
+                    chatInput.value =
+                        transcript;
+
+                    resize();
+
+                }
+
+
+                sendMessage();
+
+                return;
+
+            }
+
+        };
+
+        recognition.onerror = () => {
+
+            stopStopCommandListener();
+
+        };
+
+        recognition.onend = () => {
+
+            stopCommandRecognition = null;
+
+            if (
+                !stopCommandRequested &&
+                isSpeaking &&
+                voiceMode
+            ) {
+
+                startStopCommandListener();
+
+            }
+
+        };
+
+
+        stopCommandRecognition = recognition;
+
+
+        try {
+
+            recognition.start();
+
+        } catch {
+
+            stopCommandRecognition = null;
+
+        }
+
+    }
+
+
+    function isStopCommand(transcript) {
+
+        return (
+            /^(?:please\s+)?(?:stop|stop it|shut up|pause)[.!?]*$/i.test(
+                transcript
+            ) ||
+            /^(?:थामो|रुको|बंद करो|থামো|থামুন)[.!?]*$/i.test(
+                transcript
+            )
+        );
+
+    }
+
+
+    function isLikelyNarrationEcho(transcript) {
+
+        if (
+            !activeNarrationText ||
+            !transcript
+        ) {
+
+            return false;
+
+        }
+
+
+        const narrationWords =
+            activeNarrationText
+                .match(/[a-z0-9]+/g) || [];
+
+        const transcriptWords =
+            transcript
+                .match(/[a-z0-9]+/g) || [];
+
+
+        if (
+            transcriptWords.length < 3 ||
+            transcript.length < 14
+        ) {
+
+            return false;
+
+        }
+
+
+        const narrationWordSet =
+            new Set(narrationWords);
+
+        const matchingWords =
+            transcriptWords.filter(
+                word => narrationWordSet.has(word)
+            ).length;
+
+
+        return (
+            matchingWords /
+                transcriptWords.length >=
+            0.75
+        );
+
+    }
+
+
+    function stopStopCommandListener() {
+
+        stopCommandRequested = true;
+
+
+        if (!stopCommandRecognition) {
+
+            return;
+
+        }
+
+
+        try {
+
+            stopCommandRecognition.onend = null;
+            stopCommandRecognition.abort();
+
+        } catch {}
+
+
+        stopCommandRecognition = null;
+
+    }
+
+
+    function interruptNarration(
+        resumeListening = true
+    ) {
+
+        if (
+            !isSpeaking &&
+            !speechQueue.length
+        ) {
+
+            return;
+
+        }
+
+
+        speechGeneration++;
+
+        speechQueue = [];
+
+        stopStopCommandListener();
+
+
+        if (
+            "speechSynthesis" in window
+        ) {
+
+            try {
+
+                speechSynthesis.cancel();
+
+            } catch {}
+
+        }
+
+
+        stopSpeakingUI();
+
+
+        if (
+            resumeListening &&
+            voiceMode
+        ) {
+
+            restartMicrophone();
+
+        }
 
     }
 
@@ -3699,7 +4170,9 @@ document.addEventListener("DOMContentLoaded", () => {
             microphoneStarting ||
             recordingActive ||
             processingVoice ||
-            !voiceMode
+            isSpeaking ||
+            !voiceMode ||
+            ("speechSynthesis" in window && speechSynthesis.speaking)
         ) {
 
             return;
@@ -4360,6 +4833,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =========================================================
+       AI NARRATOR ECHO PROTECTION
+
+       Browser echoCancellation helps, but it cannot guarantee that
+       laptop speakers will never be transcribed. The narrator therefore
+       gets a second safety layer: recent TTS text is compared with the
+       transcript and discarded when it is clearly the same speech.
+    ========================================================= */
+
+    function normalizeEchoText(text) {
+        return String(text || "")
+            .toLowerCase()
+            .replace(/[^\p{L}\p{N}\s]/gu, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function narrationEchoScore(transcript) {
+        const heard = normalizeEchoText(transcript);
+        const spoken = normalizeEchoText(lastNarrationText);
+
+        if (!heard || !spoken) return 0;
+        if (Date.now() - lastNarrationAt > NARRATION_ECHO_WINDOW_MS) return 0;
+
+        if (heard === spoken) return 1;
+        if (heard.length >= 12 && spoken.includes(heard)) return 0.95;
+        if (spoken.length >= 12 && heard.includes(spoken)) return 0.95;
+
+        const a = new Set(heard.split(" ").filter(Boolean));
+        const b = new Set(spoken.split(" ").filter(Boolean));
+        if (!a.size || !b.size) return 0;
+
+        let common = 0;
+        for (const word of a) {
+            if (b.has(word)) common++;
+        }
+
+        return common / Math.max(a.size, b.size);
+    }
+
+    function isLikelyNarratorEcho(transcript) {
+        const score = narrationEchoScore(transcript);
+        // Require a fairly strong match so normal user speech is not rejected.
+        return score >= 0.72;
+    }
+
+
+    /* =========================================================
        TRANSCRIBE VOICE
     ========================================================= */
 
@@ -4415,7 +4935,7 @@ document.addEventListener("DOMContentLoaded", () => {
             */
 
             const response =
-                await fetch(
+                await fetchWithTimeout(
                     TRANSCRIBE_API_ENDPOINT,
                     {
                         method: "POST",
@@ -4490,6 +5010,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(
                     "No speech could be detected."
                 );
+
+            }
+
+            /*
+               HARD SAFETY NET AGAINST LAPTOP SPEAKER ECHO.
+               If the transcription closely matches something ChronicAI
+               just narrated, do not put it into the input or submit it.
+            */
+            if (isLikelyNarratorEcho(transcript)) {
+
+                console.warn(
+                    "Ignored likely AI narrator echo:",
+                    transcript
+                );
+
+                updateVoiceUI(
+                    "Ignored narrator audio — listening for you…"
+                );
+
+                return;
 
             }
 
@@ -4627,14 +5167,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 voiceMode &&
                 !microphoneStarting &&
                 !recordingActive &&
-                !processingVoice
+                !processingVoice &&
+                !isSpeaking
             ) {
 
                 startMicrophone();
 
             }
 
-        }, 500);
+        }, NARRATION_RESTART_COOLDOWN_MS);
 
     }
 
@@ -4647,44 +5188,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
         stopVoiceActivityDetection();
 
-
         if (mediaRecorder) {
 
             try {
-
+                mediaRecorder.ondataavailable = null;
                 mediaRecorder.onstop = null;
                 mediaRecorder.onerror = null;
-
             } catch {}
-
 
             try {
-
-                if (
-                    mediaRecorder.state !==
-                    "inactive"
-                ) {
-
+                if (mediaRecorder.state !== "inactive") {
                     mediaRecorder.stop();
-
                 }
-
             } catch {}
-
         }
 
+        mediaRecorder = null;
+        recordingActive = false;
+        audioChunks = [];
 
-        mediaRecorder =
-            null;
+        /*
+           IMPORTANT:
+           Restarting voice mode must release the previous MediaStream
+           and AudioContext. Otherwise every voice turn can leak a
+           microphone stream and create another analyser.
+        */
+        if (microphoneStream) {
 
+            microphoneStream
+                .getTracks()
+                .forEach(track => {
+                    try { track.stop(); } catch {}
+                });
+        }
 
-        recordingActive =
-            false;
+        microphoneStream = null;
 
+        if (microphoneSource) {
+            try { microphoneSource.disconnect(); } catch {}
+        }
 
-        audioChunks =
-            [];
+        microphoneSource = null;
+        analyser = null;
+        audioData = null;
 
+        if (audioContext) {
+            try { audioContext.close(); } catch {}
+        }
+
+        audioContext = null;
     }
 
 
@@ -4976,6 +5528,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         speechQueue =
             [];
+
+        stopStopCommandListener();
 
 
         if (
@@ -5496,6 +6050,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =========================================================
+       PAGE LIFECYCLE CLEANUP
+    ========================================================= */
+
+    window.addEventListener("pagehide", () => {
+
+        voiceMode = false;
+        speechGeneration++;
+        speechQueue = [];
+
+        stopStopCommandListener();
+
+        if ("speechSynthesis" in window) {
+            try { speechSynthesis.cancel(); } catch {}
+        }
+
+        stopSpeakingUI();
+        stopAllMicrophone();
+    });
+
+
+    /* =========================================================
        INITIALIZE
     ========================================================= */
 
@@ -5926,8 +6501,25 @@ document.addEventListener("DOMContentLoaded", () => {
             setPosition(
                 rect.left,
                 rect.top,
-                true
+                false
             );
+
+            try {
+                const position = {
+                    x: parseFloat(assistant.style.left),
+                    y: parseFloat(assistant.style.top)
+                };
+
+                if (
+                    Number.isFinite(position.x) &&
+                    Number.isFinite(position.y)
+                ) {
+                    localStorage.setItem(
+                        STORAGE_KEY,
+                        JSON.stringify(position)
+                    );
+                }
+            } catch {}
 
         }
     );
